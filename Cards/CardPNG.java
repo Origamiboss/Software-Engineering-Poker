@@ -1,7 +1,6 @@
 package Cards;
 
-import Cards.Numbers.*;
-import Cards.Suit.*;
+import Cards.*;
 
 import javax.swing.*;
 
