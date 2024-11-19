@@ -11,7 +11,7 @@ public class Database {
 	private Connection conn;
 	
 	//constructor
-	Database() {
+	public Database() {
 		player = new Player();
 		
 		// this is from the database.java file we had in lab7out. I included the query function from that file as well
@@ -20,7 +20,7 @@ public class Database {
 			Properties props = new Properties();
 			
 			//Open a FileINputStream
-			FileInputStream fis = new FileInputStream("lab7out/db.properties");
+			FileInputStream fis = new FileInputStream("Software-Engineering-Poker/sweProject/db.properties");
 			
 			props.load(fis);
 			
@@ -45,7 +45,7 @@ public class Database {
 		
 	}
 	
-	public Player findPlayer(String plair) {
+	public Player findPlayer(String username) {
 		Player player =  new Player();
 		
 		return player;

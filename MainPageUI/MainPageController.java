@@ -10,7 +10,7 @@ public class MainPageController extends JPanel {
 	static int sizex = 500;
 	static int sizey = 500;
 	
-	MainPageController(){
+	public MainPageController(){
 		this.setSize(sizex,sizey);
 		
 		mainpage = new MainPageGUI(this);
