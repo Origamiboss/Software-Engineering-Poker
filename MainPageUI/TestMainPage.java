@@ -11,7 +11,6 @@ public class TestMainPage {
 		j.setLayout(new BorderLayout());
 	    j.setSize(500,500);
 	    
-	    j.add(new MainPageController());
 	    
 	    j.setVisible(true);
 	}

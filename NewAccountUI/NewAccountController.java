@@ -8,11 +8,13 @@ import javax.swing.JPanel;
 public class NewAccountController extends JPanel {
 	private NewAccountUI ui;
 	private Database db;
+	private MainControl main;
 	
 	static int sizex = 500;
 	static int sizey = 500;
 	
-	public NewAccountController(Database db){
+	public NewAccountController(MainControl mainControl, Database db){
+		this.main = mainControl;
 		ui = new NewAccountUI(this);
 		this.db = db;
 		
@@ -43,5 +45,9 @@ public class NewAccountController extends JPanel {
 		newPlayer.setLoginData(accountInfo);
 		
 		db.addPlayer(newPlayer);
+	}
+	public void openInitialPanel() {
+		//ping the controller to open initial page
+		main.openInitial();
 	}
 }

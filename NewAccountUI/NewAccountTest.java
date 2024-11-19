@@ -12,7 +12,7 @@ public class NewAccountTest {
 		j.setLayout(new BorderLayout());
 	    j.setSize(500,500);
 	    
-	    j.add(new NewAccountController(new Database()));
+	    
 	    
 	    j.setVisible(true);
 	}
