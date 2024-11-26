@@ -11,6 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+//Ip address stuff
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class HostGameUI extends JPanel {
 	
@@ -45,6 +48,11 @@ public class HostGameUI extends JPanel {
 		JPanel holder = new JPanel();
 		holder.add(new JLabel("Ip Address: "));
 		ip = new JTextField(20);
+		//make the ip address unaccessible and display the ip address
+		String ipAddress = GetLocalIPAddress().getHostAddress();
+		ip.setText(ipAddress);
+		//make ip uneditable
+		ip.setEditable(false);
 		holder.add(ip);
 		childPanel.add(holder);
 		
@@ -92,5 +100,16 @@ public class HostGameUI extends JPanel {
 				control.openMainPanel();
 			}
 		}
+	}
+	private InetAddress GetLocalIPAddress() {
+
+       try {
+            InetAddress ip = InetAddress.getLocalHost();
+            return ip;
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            
+        }
+       	return null;
 	}
 }

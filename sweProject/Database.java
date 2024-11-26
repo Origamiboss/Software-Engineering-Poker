@@ -31,8 +31,18 @@ public class Database {
 			//Set the connection
 			conn = DriverManager.getConnection(url, user, pass);
 		}
-		catch(Exception e) {
-			e.printStackTrace();
+		catch (FileNotFoundException e) {
+		    System.out.println("Error: db.properties file not found");
+		    e.printStackTrace();
+		} catch (IOException e) {
+		    System.out.println("Error reading the db.properties file");
+		    e.printStackTrace();
+		} catch (SQLException e) {
+		    System.out.println("Error connecting to the database");
+		    e.printStackTrace();
+		} catch (Exception e) {
+		    System.out.println("Unexpected error");
+		    e.printStackTrace();
 		}
 	}
 	
@@ -42,13 +52,40 @@ public class Database {
 	}
 	
 	public void addPlayer(Player player ) {
-		
+		//gather data
+		LoginData l = player.getLoginData();
+		String username = l.getUsername();
+		String password = l.getPassword();
+		int wealth = player.getWealth();
+		try {
+			executeDML("INSERT INTO player VALUES('"+username+"','"+password+"',"+wealth+");");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public Player findPlayer(String username) {
-		Player player =  new Player();
-		
-		return player;
+		//locate the first datafield
+		ArrayList<String> returnedData = query("SELECT username, password, wealth FROM player WHERE username = '" + username + "'");
+		//check if there is data
+		if(returnedData != null) {
+			//Create the Player object
+			Player player =  new Player();
+			String[] playerData = returnedData.get(0).split(",");
+			
+			LoginData l = new LoginData();
+			l.setUsername(playerData[0]);
+			l.setPassword(playerData[1]);
+			player.setLoginData(l);
+			
+			player.setWealth(Integer.parseInt(playerData[2]));
+			
+			return player;
+		}else {
+			//there is no return data
+			return null;
+		}
 	}
 	
 	  public ArrayList<String> query(String query)
