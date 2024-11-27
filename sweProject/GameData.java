@@ -4,6 +4,7 @@ public class GameData {
 	private int bettedMoney;
 	private int cardsSwapped;
 	private int totalMoneyAmount;
+	private String username;
 	
 	public int getBettedMoney() {
 		return bettedMoney;
@@ -22,6 +23,20 @@ public class GameData {
 	}
 	public void setTotalMoneyAmount(int t) {
 		totalMoneyAmount = t;
+	}
+	
+	public void setUsername(String s) {
+		username = s;
+	}
+	public String getUsername() {
+		return username;
+	}
+	
+	//update the gamedata
+	public void update(GameData gd) {
+		bettedMoney = gd.getBettedMoney();
+		cardsSwapped = gd.getCardsSwapped();
+		totalMoneyAmount = gd.getTotalMoneyAmount();
 	}
 	
 }

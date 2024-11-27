@@ -93,7 +93,7 @@ public class HostGameUI extends JPanel {
 					portNumber = 0;
 				}
 				
-				control.startGameServer(ipAddress, portNumber);
+				control.startGameServer(portNumber);
 			}
 			if(e.getSource() == back) {
 				//open the main page
