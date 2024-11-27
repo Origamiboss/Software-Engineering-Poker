@@ -39,7 +39,7 @@ public class Server extends AbstractServer{
 	  // When the server starts, update the GUI.
 	  public void serverStarted()
 	  {
-	    
+		  
 	  }
 	  
 	  // When the server stops listening, update the GUI.
@@ -57,7 +57,7 @@ public class Server extends AbstractServer{
 	  // When a client connects or disconnects, display a message in the log.
 	  public void clientConnected(ConnectionToClient client)
 	  {
-		  System.out.println("Client connected: " + client.getId());
+		  
 			//tell the client to send their name
 			try {
 				client.sendToClient("Send your name");

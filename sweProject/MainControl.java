@@ -20,6 +20,8 @@ public class MainControl extends JFrame{
     private NewAccountController account;
     private GameClientControllerPanel gameClient;
     private JPanel contentPanel;  // Container to hold the pages
+    
+    Player player;
 
     public MainControl() {
         db = new Database();
@@ -76,13 +78,18 @@ public class MainControl extends JFrame{
         cl.show(contentPanel, pageName);
     }
 	
-	
+	public void setPlayer(Player p) {
+		player = p;
+	}
 	//Host Game and Create Client
 	public void HostGame(int port) {
 		openGameClient();
 		gameClient.setIp("localHost");
 		gameClient.setPort(port);
+		gameClient.setPlayer(player);
 		gameClient.isHosting(true);
+		
+		
 	}
 	
 	//Create Client
@@ -90,7 +97,10 @@ public class MainControl extends JFrame{
 		openGameClient();
 		gameClient.setIp(ip);
 		gameClient.setPort(port);
+		gameClient.setPlayer(player);
 		gameClient.isHosting(false);
+		
+		
 	}
 	
 	public static void main(String[] args) {

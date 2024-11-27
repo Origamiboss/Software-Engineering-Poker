@@ -1,6 +1,8 @@
 package sweProject;
 
-public class GameData {
+import java.io.Serializable;
+
+public class GameData implements Serializable {
 	private int bettedMoney;
 	private int cardsSwapped;
 	private int totalMoneyAmount;

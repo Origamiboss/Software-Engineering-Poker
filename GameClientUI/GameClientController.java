@@ -29,13 +29,12 @@ public class GameClientController extends AbstractClient{
 		initial = in;
 		gameui = cli;
 	}
-	public void HostGame(int port) {
+	public void HostGame(int port) throws IOException {
 		//Create a server and accompanying UI
 		Server s = new Server(port);
 		server = s;
-		
 		//start the server listening
-		s.isListening();
+		s.listen();
 		
 		this.port = port;
 		ip = "localhost";

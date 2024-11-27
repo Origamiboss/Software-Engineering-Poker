@@ -2,6 +2,7 @@ package GameClientUI;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,9 +29,8 @@ public class InitialScreenUI extends JPanel{
 		
 		this.setPreferredSize(new Dimension(gc.sizex,gc.sizey));
 		
-		GridLayout g = new GridLayout();
-		g.setColumns(1);
-		PlayerLog.setLayout(g);
+		PlayerLog.setLayout(new FlowLayout(FlowLayout.CENTER));  // Center alignment for added components
+		PlayerLog.setPreferredSize(new Dimension(gc.sizex, 100));  // Set an appropriate height
 		this.add(PlayerLog, BorderLayout.CENTER);
 		
 		
@@ -54,8 +54,11 @@ public class InitialScreenUI extends JPanel{
 		PlayerLog.removeAll();
 		//add the players
 		for(GameData gd : players) {
-			PlayerLog.add(new JLabel(gd.getUsername()));
+			JLabel label = new JLabel(gd.getUsername());
+		    label.setHorizontalAlignment(SwingConstants.CENTER);  // Center the text in the label
+		    PlayerLog.add(label);
 		}
+		this.updateUI();
 	}
 	private class EventHandler implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
