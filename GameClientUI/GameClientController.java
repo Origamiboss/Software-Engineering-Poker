@@ -1,6 +1,8 @@
 package GameClientUI;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
@@ -37,8 +39,12 @@ public class GameClientController extends AbstractClient{
 		s.listen();
 		
 		this.port = port;
-		ip = "localhost";
+		ip = GetLocalIPAddress().getHostAddress();
+		//set up the initial with the ip
+		initial.setServerIp(ip);
 		//set up the client
+		
+		
 		setHost(ip);
 		setPort(port);
 		try
@@ -61,6 +67,9 @@ public class GameClientController extends AbstractClient{
 	}
 	public void JoinGame(String ip, int port) {
 		//Join a server
+		
+		//set up the initial with the ip
+		initial.setServerIp(ip);
 		//set up the client
 		this.ip = ip;
 		this.port = port;
@@ -92,6 +101,18 @@ public class GameClientController extends AbstractClient{
 					e.printStackTrace();
 				}
 			}
+			//server is closing
+			if(arg0.toString().equals("Server is closing")) {
+				//disconnect
+				try {
+					this.closeConnection();
+					main.openMainPage();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 		}
 		if(arg0 instanceof ArrayList<?>) {
 			ArrayList<GameData> gameDataList = (ArrayList<GameData>) arg0;
@@ -106,6 +127,11 @@ public class GameClientController extends AbstractClient{
 		switch(status) {
 		case "Hosting":
 			try {
+				sendToServer(myData.getUsername() + " is leaving");
+				this.closeConnection();
+				//kick all clients
+				server.kickClients();
+				//close the server
 				server.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -128,5 +154,17 @@ public class GameClientController extends AbstractClient{
 	public void startGame() {
 		
 	}
+	
+	private InetAddress GetLocalIPAddress() {
+
+	       try {
+	            InetAddress ip = InetAddress.getLocalHost();
+	            return ip;
+	        } catch (UnknownHostException e) {
+	            e.printStackTrace();
+	            
+	        }
+	       	return null;
+		}
 	
 }

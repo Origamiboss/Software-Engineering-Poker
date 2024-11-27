@@ -14,6 +14,8 @@ import sweProject.GameData;
 
 public class InitialScreenUI extends JPanel{
 	
+	private JLabel serverIp;
+	
 	private JButton back;
 	private JButton startGame;
 	
@@ -28,13 +30,19 @@ public class InitialScreenUI extends JPanel{
 		PlayerLog = new JPanel();
 		
 		this.setPreferredSize(new Dimension(gc.sizex,gc.sizey));
+		JPanel holder = new JPanel();
+		holder.setPreferredSize(new Dimension(gc.sizex, 100));  // Set an appropriate height
+		holder.setLayout(new FlowLayout(FlowLayout.CENTER));
+		serverIp = new JLabel("Server Ip: ");
+		holder.add(serverIp);
+		this.add(holder, BorderLayout.NORTH);
 		
 		PlayerLog.setLayout(new FlowLayout(FlowLayout.CENTER));  // Center alignment for added components
 		PlayerLog.setPreferredSize(new Dimension(gc.sizex, 100));  // Set an appropriate height
 		this.add(PlayerLog, BorderLayout.CENTER);
 		
 		
-		JPanel holder = new JPanel();
+		holder = new JPanel();
 		
 		//if you are hosting, add the startGame button, otherwise its just the back button
 		back = new JButton("Back");
@@ -58,6 +66,10 @@ public class InitialScreenUI extends JPanel{
 		    label.setHorizontalAlignment(SwingConstants.CENTER);  // Center the text in the label
 		    PlayerLog.add(label);
 		}
+		this.updateUI();
+	}
+	public void setServerIp(String ip) {
+		serverIp.setText("Server IP: "+ ip);
 		this.updateUI();
 	}
 	private class EventHandler implements ActionListener{

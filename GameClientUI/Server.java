@@ -51,9 +51,19 @@ public class Server extends AbstractServer{
 	  // When the server closes completely, update the GUI.
 	  public void serverClosed()
 	  {
-	    
+		  
 	  }
-
+	  public void kickClients() {
+		//send a closing message to all players
+		  for(ConnectionToClient c : clients) {
+				try {
+					c.sendToClient("Server is closing");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		  }
+	  }
 	  // When a client connects or disconnects, display a message in the log.
 	  public void clientConnected(ConnectionToClient client)
 	  {

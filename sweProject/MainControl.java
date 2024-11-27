@@ -1,6 +1,8 @@
 package sweProject;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -24,7 +26,7 @@ public class MainControl extends JFrame{
     Player player;
 
     public MainControl() {
-        db = new Database();
+		db = new Database();
         initial = new InitialPageController(this);
         main = new MainPageController(this);
         account = new NewAccountController(this, db);
