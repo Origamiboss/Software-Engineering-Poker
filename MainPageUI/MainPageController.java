@@ -46,10 +46,10 @@ public class MainPageController extends JPanel {
 		hostpage.setVisible(false);
 		joinpage.setVisible(false);
 	}
-	public void startGameServer(String ipAddress, int portNumber) {
-		
+	public void startGameServer(int portNumber) {
+		main.HostGame(portNumber);
 	}
 	public void startGameClient(String ipAddress, int portNumber) {
-		
+		main.JoinGame(ipAddress,  portNumber);
 	}
 }

@@ -14,29 +14,29 @@ public class Database {
 	public Database() {
 		player = new Player();
 		
+		
 		// this is from the database.java file we had in lab7out. I included the query function from that file as well
 		try {
-			//Create a Properties object
-			Properties props = new Properties();
-			
-			//Open a FileINputStream
-			FileInputStream fis = new FileInputStream("Software-Engineering-Poker/sweProject/db.properties");
-			
-			props.load(fis);
-			
-			String url = props.getProperty("url");
-			String user = props.getProperty("user");
-			String pass = props.getProperty("password");
-			
-			//Set the connection
-			conn = DriverManager.getConnection(url, user, pass);
+			conn = connectToFile("sweProject/db.properties");
 		}
 		catch (FileNotFoundException e) {
-		    System.out.println("Error: db.properties file not found");
-		    e.printStackTrace();
+		    
+		    try {
+		    	conn = connectToFile("Software-Engineering-Poker/sweProject/db.properties");
+			
+		    }catch(Exception ex) {
+		    	System.out.println("Error: db.properties file not found");
+		    	ex.printStackTrace();
+		    }
 		} catch (IOException e) {
-		    System.out.println("Error reading the db.properties file");
-		    e.printStackTrace();
+		    try {
+			    conn = connectToFile("Software-Engineering-Poker/sweProject/db.properties");
+				
+		    }catch(Exception ex) {
+		    	System.out.println("Error reading the db.properties file");
+		    	ex.printStackTrace();
+		    }
+		    
 		} catch (SQLException e) {
 		    System.out.println("Error connecting to the database");
 		    e.printStackTrace();
@@ -45,7 +45,20 @@ public class Database {
 		    e.printStackTrace();
 		}
 	}
-	
+	private Connection connectToFile(String path) throws Exception {
+		Properties props = new Properties();
+	    FileInputStream fis = new FileInputStream(path);
+	    
+	    props.load(fis);
+		
+		String url = props.getProperty("url");
+		String user = props.getProperty("user");
+		String pass = props.getProperty("password");
+		
+		//Set the connection
+		Connection conn = DriverManager.getConnection(url, user, pass);
+	    return conn;
+	}
 	
 	public void removePlayer(Player player) {
 		

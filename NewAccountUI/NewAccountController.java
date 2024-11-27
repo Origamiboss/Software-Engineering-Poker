@@ -45,7 +45,8 @@ public class NewAccountController extends JPanel {
 		newPlayer.setLoginData(accountInfo);
 		
 		db.addPlayer(newPlayer);
-		
+		//set the newPlayer as out account
+		main.setPlayer(newPlayer);
 		//Open the Main Page with the account
 		main.openMainPage();
 	}
