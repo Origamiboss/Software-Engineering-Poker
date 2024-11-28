@@ -19,7 +19,6 @@ public class GameClientUI extends JPanel {
     public GameClientUI() {
         setLayout(new BorderLayout());
 
-        // Console Window (Left Panel)
         JTextArea console = new JTextArea();
         console.setEditable(false);
         console.setLineWrap(true);
@@ -28,7 +27,6 @@ public class GameClientUI extends JPanel {
         consoleScrollPane.setPreferredSize(new Dimension(400, 800));
         add(consoleScrollPane, BorderLayout.WEST);
 
-        // Player Windows (Top Panel)
         JPanel playerPanel = new JPanel();
         playerPanel.setLayout(new GridLayout(1, 3));
 
@@ -43,12 +41,9 @@ public class GameClientUI extends JPanel {
         }
         add(playerPanel, BorderLayout.NORTH);
 
-        // Pot (Center Panel)
         potLabel = new JLabel("Pot: $0", SwingConstants.CENTER);
         potLabel.setFont(new Font("Arial", Font.BOLD, 20));
         add(potLabel, BorderLayout.CENTER);
-
-        // User View (Bottom Panel)
         add(createUserView(), BorderLayout.SOUTH);
     }
 
@@ -83,7 +78,6 @@ public class GameClientUI extends JPanel {
         JPanel userView = new JPanel();
         userView.setLayout(new BorderLayout());
 
-        // User Cards and Change Buttons
         JPanel cardsPanel = new JPanel(new GridLayout(1, 5, 5, 5));
         userCardLabels = new JLabel[5];
         
@@ -105,7 +99,6 @@ public class GameClientUI extends JPanel {
         }
         userView.add(cardsPanel, BorderLayout.CENTER);
 
-        // Bet/Raise Input and Buttons
         JPanel actionPanel = new JPanel(new GridLayout(2, 3, 10, 10));
 
         
@@ -114,18 +107,22 @@ public class GameClientUI extends JPanel {
         actionPanel.add(betAmountField);
 
         JButton raiseButton = new JButton("Bet/Raise");
+        raiseButton.addActionListener(new BetRaiseButtonListener());
         actionPanel.add(raiseButton);
 
         JButton foldButton = new JButton("Fold");
+        foldButton.addActionListener(new FoldButtonListener());
         actionPanel.add(foldButton);
 
         userBalanceLabel = new JLabel("Balance: $0", SwingConstants.CENTER);
         actionPanel.add(userBalanceLabel);
 
         JButton endTurnButton = new JButton("End Turn");
+        endTurnButton.addActionListener(new EndTurnButtonListener());
         actionPanel.add(endTurnButton);
 
         JButton quitButton = new JButton("Quit");
+        quitButton.addActionListener(new QuitButtonListener());
         actionPanel.add(quitButton);
 
         userView.add(actionPanel, BorderLayout.SOUTH);
@@ -192,6 +189,39 @@ public class GameClientUI extends JPanel {
         }
     }
 
+    private class BetRaiseButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String betAmount = betAmountField.getText();
+            System.out.println("Bet/Raise amount: " + betAmount);
+            betAmountField.setText(""); // Clear text field
+        }
+    }
+
+    private class FoldButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("Player has folded.");
+            // Handle fold action here
+        }
+    }
+
+    private class EndTurnButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("Player ended turn");
+            // Handle ending turn logic here
+        }
+    }
+
+    private class QuitButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("Player quit the game");
+            // Handle quit logic here
+        }
+    }
+
     // Main method for testing
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -199,10 +229,9 @@ public class GameClientUI extends JPanel {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             GameClientUI gameClientUI = new GameClientUI();
             frame.add(gameClientUI);
-            frame.setSize(1200, 800);
+            frame.setSize(1000, 600);
             frame.setVisible(true);
 
-            // Simulating updates for testing
             gameClientUI.updateUserBalance(500);
             gameClientUI.updatePot(250);
             gameClientUI.updatePlayerBalance(0, 300);

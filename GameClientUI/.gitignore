@@ -8,3 +8,7 @@
 /Server$phase.class
 /Server.class
 /GameClientUI$ChangeCardListener.class
+/GameClientUI$BetRaiseButtonListener.class
+/GameClientUI$EndTurnButtonListener.class
+/GameClientUI$FoldButtonListener.class
+/GameClientUI$QuitButtonListener.class
