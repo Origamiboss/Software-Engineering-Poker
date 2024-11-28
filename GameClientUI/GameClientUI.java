@@ -2,16 +2,22 @@ package GameClientUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class GameClientUI {
-    public static void main(String[] args) {
-        // Create the main frame
-        JFrame frame = new JFrame("Poker Game");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1600, 900);
+public class GameClientUI extends JPanel {
+    private JLabel potLabel;
+    private JLabel[] playerBalanceLabels;
+    private JLabel[] playerBetLabels;
+    private JLabel[] playerStatusLabels;
+    private JLabel[][] playerCardLabels;
+    private JLabel[] userCardLabels;
+    private JButton[] changeCardButtons;
+    private JTextField betAmountField;
+    private JLabel userBalanceLabel;
 
-        // Set main layout
-        frame.setLayout(new BorderLayout());
+    public GameClientUI() {
+        setLayout(new BorderLayout());
 
         // Console Window (Left Panel)
         JTextArea console = new JTextArea();
@@ -19,158 +25,193 @@ public class GameClientUI {
         console.setLineWrap(true);
         console.setWrapStyleWord(true);
         JScrollPane consoleScrollPane = new JScrollPane(console);
-        consoleScrollPane.setPreferredSize(new Dimension(400, 800)); // Adjust width and height as needed
-        frame.add(consoleScrollPane, BorderLayout.WEST);
+        consoleScrollPane.setPreferredSize(new Dimension(400, 800));
+        add(consoleScrollPane, BorderLayout.WEST);
 
         // Player Windows (Top Panel)
         JPanel playerPanel = new JPanel();
-        playerPanel.setLayout(new GridLayout(1, 4));
+        playerPanel.setLayout(new GridLayout(1, 3));
+
+        playerBalanceLabels = new JLabel[3];
+        playerBetLabels = new JLabel[3];
+        playerStatusLabels = new JLabel[3];
+        playerCardLabels = new JLabel[3][5];
+
         for (int i = 0; i < 3; i++) {
-            playerPanel.add(createPlayerView("Player " + (i + 1)));
+            JPanel playerView = createPlayerView("Player " + (i + 1), i);
+            playerPanel.add(playerView);
         }
-        frame.add(playerPanel, BorderLayout.NORTH);
+        add(playerPanel, BorderLayout.NORTH);
 
         // Pot (Center Panel)
-        JLabel potLabel = new JLabel("Pot: $0", SwingConstants.CENTER);
+        potLabel = new JLabel("Pot: $0", SwingConstants.CENTER);
         potLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        frame.add(potLabel, BorderLayout.CENTER);
+        add(potLabel, BorderLayout.CENTER);
 
         // User View (Bottom Panel)
-        frame.add(createUserView(), BorderLayout.SOUTH);
-
-        // Show the frame
-        frame.setVisible(true);
+        add(createUserView(), BorderLayout.SOUTH);
     }
 
-    // Helper method to create a player view
-    private static JPanel createPlayerView(String playerName) {
+    private JPanel createPlayerView(String playerName, int playerIndex) {
         JPanel playerView = new JPanel();
         playerView.setLayout(new BorderLayout());
 
-        // Player Info
-        JPanel playerInfo = new JPanel(new GridLayout(5, 1));
-        playerInfo.add(new JLabel("Name: " + playerName));
-        playerInfo.add(new JLabel("Balance: $0"));
-        playerInfo.add(new JLabel("Folded: False"));
-        playerInfo.add(new JLabel("Cards Changed: 0"));
-        playerInfo.add(new JLabel("Bet: $0"));
+        JPanel playerInfo = new JPanel(new GridLayout(3, 1));
+        JLabel playerNameLabel = new JLabel(playerName);
+        playerBalanceLabels[playerIndex] = new JLabel("Balance: $0");
+        playerBetLabels[playerIndex] = new JLabel("Bet: $0");
+        playerStatusLabels[playerIndex] = new JLabel("Status: Active");
+        playerInfo.add(playerNameLabel);
+        playerInfo.add(playerBalanceLabels[playerIndex]);
+        playerInfo.add(playerBetLabels[playerIndex]);
 
-        playerView.add(playerInfo, BorderLayout.NORTH);
+        playerView.add(playerInfo, BorderLayout.WEST);
 
-        // Facedown Cards (Back of the cards)
         JPanel cardsPanel = new JPanel(new GridLayout(1, 5));
         for (int i = 0; i < 5; i++) {
-            // Use the back of the card image for each card
-            JLabel cardBack = createCardLabel("/GameClientUI/back.png", 50, 50); // Path to back of the card image
-            cardsPanel.add(cardBack);
+            playerCardLabels[playerIndex][i] = createCardLabel("/Cards/back.png", 50, 50);
+            cardsPanel.add(playerCardLabels[playerIndex][i]);
         }
         playerView.add(cardsPanel, BorderLayout.CENTER);
+
+        playerView.add(playerStatusLabels[playerIndex], BorderLayout.SOUTH);
 
         return playerView;
     }
 
-
-    private static JPanel createUserView() {
+    private JPanel createUserView() {
         JPanel userView = new JPanel();
         userView.setLayout(new BorderLayout());
 
-        // Panel for Cards and Buttons (Center of userView)
-        JPanel cardsAndButtonsPanel = new JPanel();
-        cardsAndButtonsPanel.setLayout(new BorderLayout());  // Use BorderLayout for internal organization
+        // User Cards and Change Buttons
+        JPanel cardsPanel = new JPanel(new GridLayout(1, 5, 5, 5));
+        userCardLabels = new JLabel[5];
+        
+        JPanel cardButtonsPanel = new JPanel(new GridLayout(1, 5, 5, 5));
+        changeCardButtons = new JButton[5];
 
-        // Cards Panel (Top part of cardsAndButtonsPanel)
-        JPanel cardsPanel = new JPanel();
-        cardsPanel.setLayout(new GridLayout(1, 5, 10, 10)); // 1 row, 5 columns, with spacing between elements
-        cardsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Padding around the grid
+        for (int i = 0; i < 5; i++) {
+        	JButton changeCardButton = new JButton("Change");
+        	changeCardButton.setActionCommand(String.valueOf(i));
+        	changeCardButton.addActionListener(new ChangeCardListener());
+        	changeCardButtons[i] = changeCardButton;
+        	cardButtonsPanel.add(changeCardButton);
+        }
+        userView.add(cardButtonsPanel, BorderLayout.NORTH);
+        
+        for (int i = 0; i < 5; i++) {
+            userCardLabels[i] = createCardLabel("/Cards/back.png", 70, 100);
+            cardsPanel.add(userCardLabels[i]); 
+        }
+        userView.add(cardsPanel, BorderLayout.CENTER);
 
-        // Card Image Labels (adjust paths to your images)
-        JLabel card1 = createCardLabel("/GameClientUI/ace_of_hearts.png", 100, 150);
-        JLabel card2 = createCardLabel("/GameClientUI/2_of_hearts.png", 100, 150);
-        JLabel card3 = createCardLabel("/GameClientUI/3_of_hearts.png", 100, 150);
-        JLabel card4 = createCardLabel("/GameClientUI/4_of_hearts.png", 100, 150);
-        JLabel card5 = createCardLabel("/GameClientUI/5_of_hearts.png", 100, 150);
+        // Bet/Raise Input and Buttons
+        JPanel actionPanel = new JPanel(new GridLayout(2, 3, 10, 10));
 
-        // Add card images to the cardsPanel
-        cardsPanel.add(card1);
-        cardsPanel.add(card2);
-        cardsPanel.add(card3);
-        cardsPanel.add(card4);
-        cardsPanel.add(card5);
+        
 
-        // Change Card Buttons Panel (Bottom part of cardsAndButtonsPanel)
-        JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new GridLayout(1, 5, 10, 10)); // 1 row, 5 columns, with spacing between elements
+        betAmountField = new JTextField();
+        actionPanel.add(betAmountField);
 
-        // Create and size the "Change Card" buttons
-        Dimension buttonSize = new Dimension(100, 20); // Width: 100, Height: 40
-        JButton changeButton1 = new JButton("Change Card");
-        changeButton1.setPreferredSize(buttonSize);
-        JButton changeButton2 = new JButton("Change Card");
-        changeButton2.setPreferredSize(buttonSize);
-        JButton changeButton3 = new JButton("Change Card");
-        changeButton3.setPreferredSize(buttonSize);
-        JButton changeButton4 = new JButton("Change Card");
-        changeButton4.setPreferredSize(buttonSize);
-        JButton changeButton5 = new JButton("Change Card");
-        changeButton5.setPreferredSize(buttonSize);
-
-        // Add the change card buttons to the buttonsPanel
-        buttonsPanel.add(changeButton1);
-        buttonsPanel.add(changeButton2);
-        buttonsPanel.add(changeButton3);
-        buttonsPanel.add(changeButton4);
-        buttonsPanel.add(changeButton5);
-
-        // Add both panels (cards and buttons) to the cardsAndButtonsPanel
-        cardsAndButtonsPanel.add(cardsPanel, BorderLayout.SOUTH); // Cards at the center
-        cardsAndButtonsPanel.add(buttonsPanel, BorderLayout.CENTER); // Buttons at the bottom
-
-        // Add the cardsAndButtonsPanel to the userView in the CENTER region
-        userView.add(cardsAndButtonsPanel, BorderLayout.CENTER);
-
-        // User Actions Panel (Bet, Fold, etc.)
-        JPanel actionPanel = new JPanel(new GridLayout(2, 3, 10, 10)); // 2 rows, 3 columns
-        JLabel balanceLabel = new JLabel("Balance: $0", SwingConstants.CENTER);
-        JTextField betField = new JTextField();
-        betField.setPreferredSize(new Dimension(100, 20));
         JButton raiseButton = new JButton("Bet/Raise");
-        JButton foldButton = new JButton("Fold");
-        JButton changeCardsButton = new JButton("Change Cards");
-        JButton quitButton = new JButton("Quit");
-
-        actionPanel.add(balanceLabel);
-        actionPanel.add(betField);
         actionPanel.add(raiseButton);
+
+        JButton foldButton = new JButton("Fold");
         actionPanel.add(foldButton);
-        actionPanel.add(changeCardsButton);
+
+        userBalanceLabel = new JLabel("Balance: $0", SwingConstants.CENTER);
+        actionPanel.add(userBalanceLabel);
+
+        JButton endTurnButton = new JButton("End Turn");
+        actionPanel.add(endTurnButton);
+
+        JButton quitButton = new JButton("Quit");
         actionPanel.add(quitButton);
 
-        // Add actionPanel to the SOUTH region of userView
         userView.add(actionPanel, BorderLayout.SOUTH);
 
         return userView;
     }
 
-
-
-    // Helper method to create a JLabel with a card image
-    // Helper method to create a JLabel with a card image (scaled with custom size)
-    private static JLabel createCardLabel(String imagePath, int width, int height) {
-        java.net.URL imgURL = GameClientUI.class.getResource(imagePath);
+    private JLabel createCardLabel(String imagePath, int width, int height) {
+        java.net.URL imgURL = getClass().getResource(imagePath);
         if (imgURL == null) {
             System.out.println("Image not found: " + imagePath);
-            return new JLabel("Image not found"); // Fallback text
+            return new JLabel("Image not found");
         }
 
-        // Load and scale the image
         ImageIcon originalIcon = new ImageIcon(imgURL);
-        Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH); // Resize
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-        JLabel cardLabel = new JLabel(scaledIcon);
-        cardLabel.setHorizontalAlignment(SwingConstants.CENTER); // Center the image
-        cardLabel.setVerticalAlignment(SwingConstants.CENTER);
-        return cardLabel;
+        Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(scaledImage));
     }
 
+    public void updateUserCard(int cardIndex, String cardImagePath) {
+        if (cardIndex >= 0 && cardIndex < userCardLabels.length) {
+            userCardLabels[cardIndex].setIcon(createCardLabel(cardImagePath, 70, 100).getIcon());
+        }
+    }
+
+    public void updateUserBalance(int balance) {
+        userBalanceLabel.setText("Balance: $" + balance);
+    }
+
+    public void updatePot(int amount) {
+        potLabel.setText("Pot: $" + amount);
+    }
+
+    public void updatePlayerBalance(int playerIndex, int balance) {
+        if (playerIndex >= 0 && playerIndex < playerBalanceLabels.length) {
+            playerBalanceLabels[playerIndex].setText("Balance: $" + balance);
+        }
+    }
+
+    public void updatePlayerBet(int playerIndex, int bet) {
+        if (playerIndex >= 0 && playerIndex < playerBetLabels.length) {
+            playerBetLabels[playerIndex].setText("Bet: $" + bet);
+        }
+    }
+
+    public void updatePlayerStatus(int playerIndex, String status) {
+        if (playerIndex >= 0 && playerIndex < playerStatusLabels.length) {
+            playerStatusLabels[playerIndex].setText("Status: " + status);
+        }
+    }
+
+    public void updatePlayerCard(int playerIndex, int cardIndex, String cardImagePath) {
+        if (playerIndex >= 0 && playerIndex < playerCardLabels.length && cardIndex >= 0 && cardIndex < playerCardLabels[playerIndex].length) {
+            playerCardLabels[playerIndex][cardIndex].setIcon(createCardLabel(cardImagePath, 50, 50).getIcon());
+        }
+    }
+
+    private class ChangeCardListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int cardIndex = Integer.parseInt(e.getActionCommand());
+            System.out.println("Card " + cardIndex + " change requested");
+            // Notify controller or backend to handle card change
+        }
+    }
+
+    // Main method for testing
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Game Client UI Test");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            GameClientUI gameClientUI = new GameClientUI();
+            frame.add(gameClientUI);
+            frame.setSize(1200, 800);
+            frame.setVisible(true);
+
+            // Simulating updates for testing
+            gameClientUI.updateUserBalance(500);
+            gameClientUI.updatePot(250);
+            gameClientUI.updatePlayerBalance(0, 300);
+            gameClientUI.updatePlayerBet(0, 50);
+            gameClientUI.updatePlayerStatus(0, "Folded");
+            gameClientUI.updateUserCard(0, "/Cards/ace_of_spades.png");
+            gameClientUI.updatePlayerCard(0, 0, "/Cards/king_of_hearts.png");
+        });
+    }
 }
+
+

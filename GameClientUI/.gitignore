@@ -1,2 +1,10 @@
 /GameClientController.class
 /GameClientUI.class
+/GameClientControllerPanel.class
+/InitialScreenUI$EventHandler.class
+/InitialScreenUI.class
+/Server$Card$Suit.class
+/Server$Card.class
+/Server$phase.class
+/Server.class
+/GameClientUI$ChangeCardListener.class
