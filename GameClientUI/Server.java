@@ -226,18 +226,36 @@ public class Server extends AbstractServer{
 		  }
 	    
 	  }
-	  public void startGame() {
+	  public void StartGame() {
 		  //tell all clients that the game is running
 		  updatePlayers("Starting Game");
-		  runGame();
+		  
+		  //now run this in the background
+		  Thread gameThread = new Thread(new Runnable() {
+		        @Override
+		        public void run() {
+		            try {
+						runGame();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		        }
+		    });
+
+		    // Start the thread
+		    gameThread.start();
 	  }
-	  private void runGame() {
+	  private void runGame() throws InterruptedException {
+		  //Give All Players the GameData
+		  updatePlayers(players);
 		  //run the game until there is 1 player left
 		  while(players.size() > 1) {
 			  //buy in
 			  updatePlayers("Buy in " + buyInCost);
 			  gamePhase = phase.Buy;
 			  latch.countDown();
+			  latch.await();
 			  //update the players on who is playing
 			  updatePlayers(participantsInRound);
 			  
@@ -245,16 +263,19 @@ public class Server extends AbstractServer{
 			  updatePlayers("Change cards");
 			  gamePhase = phase.Change;
 			  latch.countDown();
+			  latch.await();
 			  //betting phase
 			  updatePlayers("Bet");
 			  gamePhase = phase.Bet;
 			  latch.countDown();
+			  latch.await();
 			  //judging phase
 			  String winner = decideWinner();
 			  
 			  updatePlayers("Winner is " + winner);
 			  gamePhase = phase.Judge;
 			  latch.countDown();
+			  latch.await();
 		  }
 	  }
 	  

@@ -76,7 +76,7 @@ public class InitialScreenUI extends JPanel{
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == startGame) {
 				//start the Game
-				
+				gc.StartGame();
 			}
 			if(e.getSource() == back) {
 				//Go back and maybe kill server

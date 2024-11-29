@@ -16,14 +16,20 @@ public class GameClientControllerPanel extends JPanel {
     private Player player;
     private String ip;
     private int port;
+    public static int sizex = 500;
+    public static int sizey = 500;
 
     public GameClientControllerPanel(MainControl mainControl) {
         main = mainControl;
 
         initial = new InitialScreenUI(this);
         clientUI = new GameClientUI();
-        control = new GameClientController(main, initial, clientUI);
-
+        control = new GameClientController(main, this, initial, clientUI);
+        
+        //Add our username to the clientUI
+        
+        
+        
         this.setLayout(new CardLayout());
         this.add(initial, "initial");
         this.add(clientUI, "clientUI");
@@ -102,7 +108,9 @@ public class GameClientControllerPanel extends JPanel {
     public void setPort(int port) {
         this.port = port;
     }
-
+    public void StartGame() {
+    	control.StartGame();
+    }
     public void exit() {
         control.exit();
         main.openMainPage();

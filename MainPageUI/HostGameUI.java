@@ -1,6 +1,7 @@
 package MainPageUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -23,6 +24,7 @@ public class HostGameUI extends JPanel {
 	private JTextField port;
 	private JButton start;
 	private JButton back;
+	private JLabel error;
 	
 	HostGameUI(MainPageController parent){
 		control = parent;
@@ -68,6 +70,13 @@ public class HostGameUI extends JPanel {
 		holder.add(start);
 		holder.add(back);
 		childPanel.add(holder);
+		
+		//add error text
+		holder = new JPanel();
+		error = new JLabel();
+		error.setForeground(Color.red);
+		holder.add(error);
+		childPanel.add(holder);
 
 		start.addActionListener(new EventHandler());
 		back.addActionListener(new EventHandler());
@@ -111,5 +120,8 @@ public class HostGameUI extends JPanel {
             
         }
        	return null;
+	}
+	public void setErrorText(String text) {
+		error.setText(text);
 	}
 }

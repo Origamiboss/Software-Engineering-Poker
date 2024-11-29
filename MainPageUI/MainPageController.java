@@ -32,11 +32,15 @@ public class MainPageController extends JPanel {
 	
 	
 	public void openHostPanel() {
+		//reseterror
+		hostpage.setErrorText("");
 		mainpage.setVisible(false);
 		hostpage.setVisible(true);
 		joinpage.setVisible(false);
 	}
 	public void openJoinPanel() {
+		//reset error
+		joinpage.setErrorText("");
 		mainpage.setVisible(false);
 		hostpage.setVisible(false);
 		joinpage.setVisible(true);
@@ -47,9 +51,20 @@ public class MainPageController extends JPanel {
 		joinpage.setVisible(false);
 	}
 	public void startGameServer(int portNumber) {
-		main.HostGame(portNumber);
+		if(String.valueOf(portNumber).length() == 4)
+			main.HostGame(portNumber);
+		else
+			hostpage.setErrorText("Enter a Valid Port Number");
 	}
 	public void startGameClient(String ipAddress, int portNumber) {
-		main.JoinGame(ipAddress,  portNumber);
+		if(String.valueOf(portNumber).length() != 4)
+			joinpage.setErrorText("Enter a Valid Port Number");
+		else {
+			if(main.validIp(ipAddress,portNumber))
+				main.JoinGame(ipAddress,  portNumber);
+			else
+				joinpage.setErrorText("Invalid Address");
+		}
+		
 	}
 }

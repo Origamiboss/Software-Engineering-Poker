@@ -1,9 +1,15 @@
 package GameClientUI;
 
 import javax.swing.*;
+
+import sweProject.GameData;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameClientUI extends JPanel {
     private JLabel potLabel;
@@ -15,7 +21,13 @@ public class GameClientUI extends JPanel {
     private JButton[] changeCardButtons;
     private JTextField betAmountField;
     private JLabel userBalanceLabel;
-
+    
+    //Vincent's Additions
+    private JPanel playerPanel;
+    private String username;
+    //<Player Username, Player Id>
+    private Map<String, Integer> playerIdDictionary;
+    
     public GameClientUI() {
         setLayout(new BorderLayout());
 
@@ -27,7 +39,7 @@ public class GameClientUI extends JPanel {
         consoleScrollPane.setPreferredSize(new Dimension(400, 800));
         add(consoleScrollPane, BorderLayout.WEST);
 
-        JPanel playerPanel = new JPanel();
+        playerPanel = new JPanel();
         playerPanel.setLayout(new GridLayout(1, 3));
 
         playerBalanceLabels = new JLabel[3];
@@ -178,6 +190,33 @@ public class GameClientUI extends JPanel {
         if (playerIndex >= 0 && playerIndex < playerCardLabels.length && cardIndex >= 0 && cardIndex < playerCardLabels[playerIndex].length) {
             playerCardLabels[playerIndex][cardIndex].setIcon(createCardLabel(cardImagePath, 50, 50).getIcon());
         }
+    }
+    
+    //Vincent's Additions
+    public void setClientUsername(String username) {
+    	this.username = username;
+    }
+    public void updatePlayerPanel(ArrayList<GameData> players) {
+    	
+    	// Initialize the playerIdDictionary if it's not initialized
+        if (playerIdDictionary == null) {
+            playerIdDictionary = new HashMap<>();
+        }
+    	
+    	//reset the playerView
+    	playerPanel.removeAll();
+    	//Add the players
+    	int Ids = 0;
+    	for (GameData gd : players) {
+    		//only create the panel if it isn't our own
+    		if(!gd.getUsername().equals(username)) {
+	    		playerIdDictionary.put(gd.getUsername(), Ids);
+	            JPanel playerView = createPlayerView(gd.getUsername(), Ids);
+	            Ids++;
+	            playerPanel.add(playerView);         
+    		}
+        }
+    	playerPanel.updateUI();
     }
 
     private class ChangeCardListener implements ActionListener {

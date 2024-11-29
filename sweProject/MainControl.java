@@ -13,6 +13,7 @@ import InitialPageUI.InitialPageController;
 import MainPageUI.MainPageController;
 import NewAccountUI.NewAccountController;
 import NewAccountUI.NewAccountTest;
+import ocsf.client.AbstractClient;
 
 public class MainControl extends JFrame{
 	
@@ -104,8 +105,34 @@ public class MainControl extends JFrame{
 		
 		
 	}
+	//Make Sure server exists
+	public boolean validIp(String ip, int port) {
+		try {
+			testClient abs = new testClient(ip,port);
+			abs.openConnection();
+			//if Connection works set true
+			return true;
+		}catch(Exception e) {
+			return false;
+		}
+		
+	}
 	
 	public static void main(String[] args) {
 		new MainControl();
+	}
+	private class testClient extends AbstractClient{
+		
+		public testClient(String ip, int port){
+			super(ip,port);
+			setHost(ip);
+			setPort(port);
+		}
+
+		@Override
+		protected void handleMessageFromServer(Object arg0) {
+			// TODO Auto-generated method stub
+			//Does not care about return values
+		}
 	}
 }

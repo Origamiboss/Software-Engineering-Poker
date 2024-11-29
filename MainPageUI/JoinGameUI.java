@@ -1,6 +1,7 @@
 package MainPageUI;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -20,6 +21,7 @@ public class JoinGameUI extends JPanel{
 	private JTextField port;
 	private JButton join;
 	private JButton back;
+	private JLabel error;
 	
 	private MainPageController control;
 	JoinGameUI(MainPageController parent){
@@ -61,7 +63,14 @@ public class JoinGameUI extends JPanel{
 		holder.add(join);
 		holder.add(back);
 		childPanel.add(holder);
-
+		
+		//add error text
+		holder = new JPanel();
+		error = new JLabel();
+		error.setForeground(Color.red);
+		holder.add(error);
+		childPanel.add(holder);
+		
 		join.addActionListener(new EventHandler());
 		back.addActionListener(new EventHandler());
 		
@@ -91,5 +100,8 @@ public class JoinGameUI extends JPanel{
 				control.openMainPanel();
 			}
 		}
+	}
+	public void setErrorText(String text) {
+		error.setText(text);
 	}
 }
