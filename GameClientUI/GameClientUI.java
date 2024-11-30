@@ -135,7 +135,7 @@ public class GameClientUI extends JPanel {
         actionPanel.add(raiseButton);
         
         JButton buyInButton = new JButton("Buy in");
-        raiseButton.addActionListener(new BuyInButtonListener());
+        buyInButton.addActionListener(new BuyInButtonListener());
         actionPanel.add(buyInButton);
 
         JButton foldButton = new JButton("Fold");
