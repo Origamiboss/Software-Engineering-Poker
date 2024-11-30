@@ -268,6 +268,14 @@ public class GameClientController extends AbstractClient{
 			e.printStackTrace();
 		}
 	}
+	public void skip() {
+		try {
+			sendToServer("skip");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void changeCards(ArrayList<Integer> indexes) {
 		//Message should be "Username:1,2,3"
 		String data = myData.getUsername() + ":";

@@ -284,7 +284,7 @@ public class GameClientUI extends JPanel {
 	            System.out.println("Bet/Raise amount: " + betAmount);
 	            betAmountField.setText(""); // Clear text field
 	            //test
-	            
+	            stage = stageOfGame.NONE;
         	}
         }
     }
@@ -325,8 +325,11 @@ public class GameClientUI extends JPanel {
             	//Message should be "Username:Card|1,Card|2"
             	
             	gc.changeCards(cardsToChange);
+            }else if(stage != stageOfGame.NONE) {
+            	stage = stageOfGame.NONE;
+            	gc.skip();
             }
-            stage = stageOfGame.NONE;
+           
         }
     }
 

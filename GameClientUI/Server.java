@@ -281,6 +281,9 @@ public class Server extends AbstractServer{
 					  latch.countDown();
 					  break;
 				  }
+				  if(msg.contains("skip")) {
+					  latch.countDown();
+				  }
 			  }
 			  if(arg0 instanceof Map) {
 				  //recieved playerId
