@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JLabel;
@@ -28,6 +29,11 @@ public class Server extends AbstractServer{
 	  private ArrayList<GameData> participantsInRound;
 	  //The Participants Cards
 	  private Map<String, List<Card>> hands;
+	  //<Player Username, Player Id>
+	  private Map<String, Integer> playerIdDictionary;
+	  
+	  //used cards holder
+	  private ArrayList<Card> usedCards;
 	  
 	  //how a latch works is that it will count down from a number before moving on
 	  private CountDownLatch latch = new CountDownLatch(0);
@@ -49,6 +55,8 @@ public class Server extends AbstractServer{
 	    players = new ArrayList<GameData>();
 	    clients = new ArrayList<ConnectionToClient>();
 	    participantsInRound = new ArrayList<GameData>();
+	    
+	    hands = new HashMap<>();
 	  }
 	  public void kickClients() {
 		//send a closing message to all players
@@ -140,30 +148,45 @@ public class Server extends AbstractServer{
 				  //Depending on the gamePhase, the different GameData will have different meanings
 				  switch(gamePhase) {
 				  case phase.Buy:
-					  if(clientData.getBettedMoney() == buyInCost)
+					  if(clientData.getTotalMoneyAmount() >= buyInCost) {
+						  clientData.setBettedMoney(buyInCost);
+						  clientData.setTotalMoneyAmount(clientData.getTotalMoneyAmount() - buyInCost);
 						  participantsInRound.add(clientData);
-					  //generate a hand for the client
-					  hands.put(clientData.getUsername(), generateCards());
-					  //send the client their new hand
-					  //Generate the String Array
-					  String[] cards = new String[hands.get(clientData.getUsername()).size()];
-					  for(int i = 0; i < cards.length; i++) {
-						  cards[i] = hands.get(clientData.getUsername()).get(i).getCardType();
-					  }
-					  updatePlayer(cards,arg1);
-					  
-					  break;
-				  case phase.Bet:
-					  //update the GameData with the bet and then update everybody about it
-					  for(GameData gd : participantsInRound) {
-						  if(gd.getUsername().equals(clientData.getUsername())) {
-							  gd.update(clientData);
-							  break;
+						  //generate a hand for the client
+						  hands.put(clientData.getUsername(), generateCards());
+						  //send the client their new hand
+						  //Generate the String Array
+						  String[] cards = new String[hands.get(clientData.getUsername()).size()];
+						  System.out.println(cards.length);
+						  for(int i = 0; i < cards.length; i++) {
+							  cards[i] = hands.get(clientData.getUsername()).get(i).getCardType();
+							  
+							  
+							  //send the specific card data
+							  String card = "updateUserCard:";
+							  card = card + i +",";
+							  //locate the card path
+							  String[] cardData = cards[i].split(",");
+							  //fix cardData[1] with king, queen, jack, or ace
+							  if(cardData[1].contains("11")) {
+								  cardData[1] = "jack";
+							  }else if(cardData[1].contains("12")) {
+								  cardData[1] = "queen";
+							  }else if(cardData[1].contains("13")) {
+								  cardData[1] = "king";
+							  }else if(cardData[1].contains("14")) {
+								  cardData[1] = "ace";
+							  }
+							  String cardPath = "/Cards/"+cardData[1]+"_of_"+cardData[0].toLowerCase()+".png";
+							  card += cardPath;
+							  
+							  updatePlayer(card,arg1);
 						  }
 					  }
-					  updatePlayers(participantsInRound);
+					  
+					  
 					  break;
-				  }
+				  
 			  }
 			  if(arg0 instanceof String) {
 				  String msg = (String)arg0;
@@ -189,20 +212,20 @@ public class Server extends AbstractServer{
 								  String[] cardData = cards[i].split("|");
 								  Card.Suit suit;
 								  switch(cardData[0].toLowerCase()) {
-								  case "diamond":
-									  suit = Card.Suit.DIAMOND;
+								  case "diamonds":
+									  suit = Card.Suit.DIAMONDS;
 									  break;
-								  case "heart":
-									  suit = Card.Suit.HEART;
+								  case "hearts":
+									  suit = Card.Suit.HEARTS;
 									  break;
-								  case "clover":
-									  suit = Card.Suit.CLOVER;
+								  case "clovers":
+									  suit = Card.Suit.CLUBS;
 									  break;
-								  case "spade":
-									  suit = Card.Suit.SPADE;
+								  case "spades":
+									  suit = Card.Suit.SPADES;
 									  break;
 								  default:
-									  suit = Card.Suit.DIAMOND;
+									  suit = Card.Suit.DIAMONDS;
 								  }
 								  //assign the type of card
 								  int type = Integer.parseInt(cardData[1]);
@@ -238,7 +261,30 @@ public class Server extends AbstractServer{
 						  }
 					  }
 					  break;
+				  case phase.Bet:
+					  //update the GameData with the bet and then update everybody about it
+					  
+					  if(msg.contains("Bet:")) {
+						  msg = msg.split("Bet:")[0];
+						  String[] data = msg.split(",");
+						  for(GameData gd : participantsInRound) {
+							  if(gd.getUsername().equals(data[0]) && gd.getTotalMoneyAmount() >= Integer.parseInt(data[1])) {
+								  int bettedMoney = Integer.parseInt(data[1]);
+								  gd.setBettedMoney(gd.getBettedMoney() + bettedMoney);
+								  gd.setTotalMoneyAmount(gd.getTotalMoneyAmount() - bettedMoney);
+								  break;
+							  }
+						  }
+					  }
+					  
+					  updatePlayers(participantsInRound);
+					  break;
 				  }
+				  }
+			  }
+			  if(arg0 instanceof Map) {
+				  //recieved playerId
+				  playerIdDictionary = (Map)arg0;
 			  }
 			 
 		  }
@@ -269,6 +315,7 @@ public class Server extends AbstractServer{
 		  updatePlayers(players);
 		  //run the game until there is 1 player left
 		  while(players.size() > 1) {
+			  usedCards = new ArrayList<>();
 			  //buy in
 			  updatePlayers("Buy in " + buyInCost);
 			  gamePhase = phase.Buy;
@@ -348,22 +395,54 @@ public class Server extends AbstractServer{
 	  }
 	  //generate a whole new hand
 	  private List<Card> generateCards() {
-		  List<Card> hand = null;
-		  
-		  
-		  return hand;
+		  return generateCards(5);
 	  }
 	  //generate a couple new cards
 	  private List<Card> generateCards(int amount) {
-		  List<Card> hand = null;
+		  List<Card> hand = new ArrayList<>();
 		  
+		  for(int i =0; i < amount; i++) {
+			  Card.Suit suit;
+			  Random rand = new Random();
+			  int value = rand.nextInt(2,14);
+			  int suitNum = rand.nextInt(1,4);
+			  switch(suitNum) {
+			  case 1:
+				  suit = Card.Suit.DIAMONDS;
+				  break;
+			  case 2:
+				  suit = Card.Suit.HEARTS;
+				  break;
+			  case 3:
+				  suit = Card.Suit.CLUBS;
+				  break;
+			  default:
+				  suit = Card.Suit.SPADES;
+				  break;
+			  }
+			  boolean cardNotFound = true;
+			  Card newCard = new Card(suit,value);
+			  for(Card c : usedCards) {
+				  if(c.getSuit() == newCard.getSuit() && c.getValue() == newCard.getValue()) {
+					  cardNotFound = false;
+					  break;
+				  }
+			  }
+			  if(cardNotFound) {
+				  hand.add(new Card(suit,value));
+			  	  usedCards.add(new Card(suit, value));
+			  }
+			  else {
+				  i--;
+			  }
+		  }
 		  
 		  return hand;
 	  }
 	  //create a card class to hold the card types
 	  private class Card {
 		  enum Suit {
-		        DIAMOND, HEART, CLOVER, SPADE
+		        DIAMONDS, HEARTS, CLUBS, SPADES
 		    }
 
 		    private Suit suit;

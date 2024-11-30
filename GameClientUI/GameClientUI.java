@@ -2,7 +2,6 @@ package GameClientUI;
 
 import javax.swing.*;
 
-import GameClientUI.Server.Card;
 import GameClientUI.Server.PokerHandEvaluator;
 import sweProject.GameData;
 
@@ -30,7 +29,8 @@ public class GameClientUI extends JPanel {
     private JPanel playerPanel;
     private String username;
     //<Player Username, Player Id>
-    private Map<String, Integer> playerIdDictionary;
+    public Map<String, Integer> playerIdDictionary;
+    private GameClientController gc;
     
     public GameClientUI() {
         setLayout(new BorderLayout());
@@ -200,6 +200,9 @@ public class GameClientUI extends JPanel {
     public void setClientUsername(String username) {
     	this.username = username;
     }
+    public void setGameClientController(GameClientController gc) {
+    	this.gc = gc;
+    }
     public void updatePlayerPanel(ArrayList<GameData> players) {
     	
     	// Initialize the playerIdDictionary if it's not initialized
@@ -238,6 +241,8 @@ public class GameClientUI extends JPanel {
             String betAmount = betAmountField.getText();
             System.out.println("Bet/Raise amount: " + betAmount);
             betAmountField.setText(""); // Clear text field
+            //test
+            gc.buyIn();
         }
     }
 

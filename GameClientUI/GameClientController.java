@@ -32,6 +32,7 @@ public class GameClientController extends AbstractClient{
 		main = mainControl;
 		initial = in;
 		gameui = cli;
+		gameui.setGameClientController(this);
 		this.gcp = gcp;  
 	}
 	public void HostGame(int port) throws IOException {
@@ -136,12 +137,23 @@ public class GameClientController extends AbstractClient{
 				ArrayList<GameData> gameDataList = (ArrayList<GameData>) arg0;
 				//update initial
 				gameui.updatePlayerPanel(gameDataList);
+				//send the dictionary back
+				try {
+					sendToServer(gameui.playerIdDictionary);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 			//update user and player values
 			//example message from server to invoke a function: "updatePlayerBalance: 2, 500"
 			else if (arg0 instanceof String) {
 	            String message = arg0.toString();
+	            if (message.startsWith("Buy in ")) {
+	            	//tell the client its time to buy in
+	            	
+	            }
 	            if (message.startsWith("updateUserBalance:")) 
 	            {
 	            	int balance = Integer.parseInt(message.split(":")[1].trim());
@@ -153,6 +165,7 @@ public class GameClientController extends AbstractClient{
                     int cardIndex = Integer.parseInt(parts[0].trim());
                     String newCardImagePath = parts[1].trim();
                     gcp.updateUserCard(cardIndex, newCardImagePath);
+                    System.out.println("test");
 	            }
 	            if (message.startsWith("updatePot:")) 
 	            {
@@ -234,6 +247,14 @@ public class GameClientController extends AbstractClient{
 			server.StartGame();
 		}
 		
+	}
+	public void buyIn() {
+		try {
+			sendToServer(myData);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	
