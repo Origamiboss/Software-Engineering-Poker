@@ -115,7 +115,7 @@ public class GameClientUI extends JPanel {
         }
         userView.add(cardsPanel, BorderLayout.CENTER);
 
-        JPanel actionPanel = new JPanel(new GridLayout(2, 3, 10, 10));
+        JPanel actionPanel = new JPanel(new GridLayout(2, 4, 10, 10));
 
         
 
@@ -125,6 +125,10 @@ public class GameClientUI extends JPanel {
         JButton raiseButton = new JButton("Bet/Raise");
         raiseButton.addActionListener(new BetRaiseButtonListener());
         actionPanel.add(raiseButton);
+        
+        JButton buyInButton = new JButton("Buy in");
+        raiseButton.addActionListener(new BuyInButtonListener());
+        actionPanel.add(buyInButton);
 
         JButton foldButton = new JButton("Fold");
         foldButton.addActionListener(new FoldButtonListener());
@@ -243,6 +247,14 @@ public class GameClientUI extends JPanel {
             betAmountField.setText(""); // Clear text field
             //test
             gc.buyIn();
+        }
+    }
+    
+    private class BuyInButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.out.println("Player bought in.");
+            // Handle fold action here
         }
     }
 
