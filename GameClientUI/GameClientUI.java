@@ -279,13 +279,12 @@ public class GameClientUI extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
         	//remove BUYIN once button is established
-        	if(stage == stageOfGame.BET || stage == stageOfGame.BUYIN) {
+        	if(stage == stageOfGame.BET) {
 	            String betAmount = betAmountField.getText();
 	            System.out.println("Bet/Raise amount: " + betAmount);
 	            betAmountField.setText(""); // Clear text field
 	            //test
-	            gc.buyIn();
-	            stage = stageOfGame.NONE;
+	            
         	}
         }
     }
@@ -293,8 +292,13 @@ public class GameClientUI extends JPanel {
     private class BuyInButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Player bought in.");
+            
             // Handle fold action here
+            if(stage == stageOfGame.BUYIN) {
+            	System.out.println("Player bought in.");
+            	gc.buyIn();
+	            stage = stageOfGame.NONE;
+            }
         }
     }
 
