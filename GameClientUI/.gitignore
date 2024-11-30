@@ -12,3 +12,4 @@
 /GameClientUI$EndTurnButtonListener.class
 /GameClientUI$FoldButtonListener.class
 /GameClientUI$QuitButtonListener.class
+/Server$PokerHandEvaluator.class

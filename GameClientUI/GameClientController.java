@@ -129,7 +129,8 @@ public class GameClientController extends AbstractClient{
 				//update initial
 				initial.updateWhoJoined(gameDataList);
 			}
-		}else {
+		}
+		else {
 			//the Game has started
 			if(arg0 instanceof ArrayList<?>) {
 				ArrayList<GameData> gameDataList = (ArrayList<GameData>) arg0;
@@ -137,6 +138,64 @@ public class GameClientController extends AbstractClient{
 				gameui.updatePlayerPanel(gameDataList);
 			}
 			
+			//update user and player values
+			//example message from server to invoke a function: "updatePlayerBalance: 2, 500"
+			else if (arg0 instanceof String) {
+	            String message = arg0.toString();
+	            if (message.startsWith("updateUserBalance:")) 
+	            {
+	            	int balance = Integer.parseInt(message.split(":")[1].trim());
+					gcp.updateUserBalance(balance);
+	            }
+	            if (message.startsWith("updateUserCard:"))
+	            {
+	            	String[] parts = message.split(":")[1].split(",", 2);
+                    int cardIndex = Integer.parseInt(parts[0].trim());
+                    String newCardImagePath = parts[1].trim();
+                    gcp.updateUserCard(cardIndex, newCardImagePath);
+	            }
+	            if (message.startsWith("updatePot:")) 
+	            {
+	            	int amount = Integer.parseInt(message.split(":")[1].trim());
+					gcp.updatePot(amount);
+	            }
+	            if (message.startsWith("updatePlayerBalance:"))
+	            {
+	            	String[] parts = message.split(":")[1].split(",", 2);
+                    int playerIndex = Integer.parseInt(parts[0].trim());
+                    int balance = Integer.parseInt(parts[1].trim());
+                    gcp.updatePlayerBalance(playerIndex, balance);
+	            }
+	            if (message.startsWith("updatePlayerCard:"))
+	            {
+	            	String[] parts = message.split(":")[1].split(",", 3);
+	            	int playerIndex = Integer.parseInt(parts[0].trim());
+                    int cardIndex = Integer.parseInt(parts[1].trim());
+                    String newCardImagePath = parts[2].trim();
+                    gcp.updatePlayerCard(playerIndex, cardIndex, newCardImagePath);
+	            }
+	            if (message.startsWith("updatePlayerBet:"))
+	            {
+	            	String[] parts = message.split(":")[1].split(",", 2);
+                    int playerIndex = Integer.parseInt(parts[0].trim());
+                    int betAmount = Integer.parseInt(parts[1].trim());
+                    gcp.updatePlayerBet(playerIndex, betAmount);
+	            }
+	            if (message.startsWith("updatePlayerStatus:"))
+	            {
+	            	String[] parts = message.split(":")[1].split(",", 2);
+                    int cardIndex = Integer.parseInt(parts[0].trim());
+                    String folded = parts[1].trim();
+                    gcp.updatePlayerStatus(cardIndex, folded);
+	            }
+	            if (message.startsWith("updateCardsChanged:"))
+	            {
+	            	String[] parts = message.split(":")[1].split(",", 2);
+                    int playerIndex = Integer.parseInt(parts[0].trim());
+                    int cardsChanged = Integer.parseInt(parts[1].trim());
+                    gcp.updateCardsChanged(playerIndex, cardsChanged);
+	            }
+	        }
 		}
 	}
 	private void handleError(String error) {

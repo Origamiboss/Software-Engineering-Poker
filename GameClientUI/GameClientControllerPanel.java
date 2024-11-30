@@ -54,7 +54,7 @@ public class GameClientControllerPanel extends JPanel {
         clientUI.updateUserBalance(balance);
     }
     
-    public void changeUserCard(int cardIndex, String newCardImagePath) {
+    public void updateUserCard(int cardIndex, String newCardImagePath) {
         clientUI.updateUserCard(cardIndex, newCardImagePath);
     }
 
@@ -79,7 +79,7 @@ public class GameClientControllerPanel extends JPanel {
     }
 
     public void updateCardsChanged(int playerIndex, int cardsChanged) {
-        clientUI.updatePlayerBet(playerIndex, cardsChanged); // Adjust label for cards changed.
+        clientUI.updatePlayerBet(playerIndex, cardsChanged);
     }
 
     public void isHosting(boolean isHosting) {
