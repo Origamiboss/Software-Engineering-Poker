@@ -99,6 +99,8 @@ public class GameClientControllerPanel extends JPanel {
 
     public void setPlayer(Player p) {
         player = p;
+        //set the username for gameClient
+        clientUI.setClientUsername(p.getLoginData().getUsername());
     }
 
     public void setIp(String ip) {

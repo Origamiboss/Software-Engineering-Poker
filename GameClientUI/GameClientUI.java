@@ -32,7 +32,15 @@ public class GameClientUI extends JPanel {
     public Map<String, Integer> playerIdDictionary;
     private GameClientController gc;
     
+    private ArrayList<Integer> cardsToChange;
+    
+    private enum stageOfGame{
+    	BUYIN,CHANGE,BET,JUDGE,NONE
+    }
+    private stageOfGame stage;
+    
     public GameClientUI() {
+    	stage = stageOfGame.NONE;
         setLayout(new BorderLayout());
 
         JTextArea console = new JTextArea();
@@ -223,30 +231,62 @@ public class GameClientUI extends JPanel {
     		if(!gd.getUsername().equals(username)) {
 	    		playerIdDictionary.put(gd.getUsername(), Ids);
 	            JPanel playerView = createPlayerView(gd.getUsername(), Ids);
+	            //edit the stats of the view
+	            updatePlayerBalance(Ids, gd.getTotalMoneyAmount());
+	            updatePlayerBet(Ids, gd.getBettedMoney());
+	            
+	            
 	            Ids++;
 	            playerPanel.add(playerView);         
+    		}else {
+    			//if it is me
+    			updateUserBalance(gd.getTotalMoneyAmount());
     		}
         }
     	playerPanel.updateUI();
     }
-
+    
+    public void buyIn() {
+    	stage = stageOfGame.BUYIN;
+    }
+    public void changeCards() {
+    	stage = stageOfGame.CHANGE;
+    	cardsToChange = new ArrayList<>();
+    }
+    public void betIn() {
+    	stage = stageOfGame.BET;
+    }
+    public void judge() {
+    	stage = stageOfGame.JUDGE;
+    }
     private class ChangeCardListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int cardIndex = Integer.parseInt(e.getActionCommand());
-            System.out.println("Card " + cardIndex + " change requested");
-            // Notify controller or backend to handle card change
+        	if(stage == stageOfGame.CHANGE) {
+	            int cardIndex = Integer.parseInt(e.getActionCommand());
+	            System.out.println("Card " + cardIndex + " change requested");
+	            // Notify controller or backend to handle card change
+	            if(cardsToChange.contains(cardIndex)) {
+	            	cardsToChange.remove(cardIndex);
+	            }else {
+	            	cardsToChange.add(cardIndex);
+	            }
+        	}
         }
     }
 
     private class BetRaiseButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String betAmount = betAmountField.getText();
-            System.out.println("Bet/Raise amount: " + betAmount);
-            betAmountField.setText(""); // Clear text field
-            //test
-            gc.buyIn();
+        	//remove BUYIN once button is established
+        	if(stage == stageOfGame.BET || stage == stageOfGame.BUYIN) {
+	            String betAmount = betAmountField.getText();
+	            System.out.println("Bet/Raise amount: " + betAmount);
+	            betAmountField.setText(""); // Clear text field
+	            //test
+	            gc.buyIn();
+	            stage = stageOfGame.NONE;
+        	}
         }
     }
     
@@ -261,8 +301,12 @@ public class GameClientUI extends JPanel {
     private class FoldButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Player has folded.");
-            // Handle fold action here
+        	if(stage == stageOfGame.BET) {
+	            System.out.println("Player has folded.");
+	            // Handle fold action here
+	            
+	            stage = stageOfGame.NONE;
+        	}
         }
     }
 
@@ -271,6 +315,14 @@ public class GameClientUI extends JPanel {
         public void actionPerformed(ActionEvent e) {
             System.out.println("Player ended turn");
             // Handle ending turn logic here
+            if(stage == stageOfGame.CHANGE) {
+            	//send the list of cards to server
+            	//if the changeCards[i] == 1 then it is a card to change
+            	//Message should be "Username:Card|1,Card|2"
+            	
+            	gc.changeCards(cardsToChange);
+            }
+            stage = stageOfGame.NONE;
         }
     }
 

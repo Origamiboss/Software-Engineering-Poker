@@ -152,7 +152,19 @@ public class GameClientController extends AbstractClient{
 	            String message = arg0.toString();
 	            if (message.startsWith("Buy in ")) {
 	            	//tell the client its time to buy in
-	            	
+	            	gameui.buyIn();
+	            }
+	            if(message.startsWith("Change cards")) {
+	            	//tell the client its time to change
+	            	gameui.changeCards();
+	            }
+	            if(message.startsWith("Bet ")) {
+	            	//tell the client its time to change
+	            	gameui.betIn();
+	            }
+	            if(message.startsWith("Winner is")) {
+	            	//tell the client its time to change
+	            	gameui.judge();
 	            }
 	            if (message.startsWith("updateUserBalance:")) 
 	            {
@@ -256,7 +268,23 @@ public class GameClientController extends AbstractClient{
 			e.printStackTrace();
 		}
 	}
-	
+	public void changeCards(ArrayList<Integer> indexes) {
+		//Message should be "Username:1,2,3"
+		String data = myData.getUsername() + ":";
+		for(int i : indexes) {
+			data = data + i + ",";
+		}
+		if (data.endsWith(",")) {
+		    data = data.substring(0, data.length() - 1);
+		}
+		//remove the , at the end
+		try {
+			sendToServer(data);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	
 	private InetAddress GetLocalIPAddress() {

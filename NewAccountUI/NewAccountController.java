@@ -43,6 +43,8 @@ public class NewAccountController extends JPanel {
 		//if the account doesn't exist, create it
 		Player newPlayer = new Player();
 		newPlayer.setLoginData(accountInfo);
+		//set money
+		newPlayer.setWealth(500);
 		
 		db.addPlayer(newPlayer);
 		//set the newPlayer as out account

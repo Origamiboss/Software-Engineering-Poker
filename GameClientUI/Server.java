@@ -157,7 +157,6 @@ public class Server extends AbstractServer{
 						  //send the client their new hand
 						  //Generate the String Array
 						  String[] cards = new String[hands.get(clientData.getUsername()).size()];
-						  System.out.println(cards.length);
 						  for(int i = 0; i < cards.length; i++) {
 							  cards[i] = hands.get(clientData.getUsername()).get(i).getCardType();
 							  
@@ -180,86 +179,87 @@ public class Server extends AbstractServer{
 							  String cardPath = "/Cards/"+cardData[1]+"_of_"+cardData[0].toLowerCase()+".png";
 							  card += cardPath;
 							  
+							  //give the cards
 							  updatePlayer(card,arg1);
+							  
 						  }
 					  }
 					  
-					  
+					  latch.countDown();
 					  break;
 				  
+				  	}
+			  
 			  }
 			  if(arg0 instanceof String) {
 				  String msg = (String)arg0;
 				  switch(gamePhase) {
 				  case phase.Change:
-					  //Message should be "Username:Card|1,Card|2"
+					  //Message should be "Username:1,2,3"
 					  //split the msg into username and cards
 					  String username = msg.split(":")[0];
+					  System.out.println(username);
 					  String cardMessage = msg.split(":")[1];
+					  System.out.println(cardMessage);
 					  String[] cards = cardMessage.split(",");
+					  System.out.println(cards);
 					  //locate which player wants to replace their cards
 					  for(GameData gd : participantsInRound) {
 						  if(gd.getUsername().equals(username)) {
 							  //replace their cards
-							  //Gather the card records
-							  List<Card> savedCards = hands.get(gd);
-							  //Generate new Cards
-							  List<Card> newCards = generateCards(cards.length);
-							  int newCardCounter = 0;
-							  //Create dummy cards
-							  List<Card> changeCards = null;
-							  for(int i=0; i< newCards.size(); i++) {
-								  String[] cardData = cards[i].split("|");
-								  Card.Suit suit;
-								  switch(cardData[0].toLowerCase()) {
-								  case "diamonds":
-									  suit = Card.Suit.DIAMONDS;
-									  break;
-								  case "hearts":
-									  suit = Card.Suit.HEARTS;
-									  break;
-								  case "clovers":
-									  suit = Card.Suit.CLUBS;
-									  break;
-								  case "spades":
-									  suit = Card.Suit.SPADES;
-									  break;
-								  default:
-									  suit = Card.Suit.DIAMONDS;
-								  }
-								  //assign the type of card
-								  int type = Integer.parseInt(cardData[1]);
-								  
-								  changeCards.add(new Card(suit,type));
-							  }
-							  //now replace the savedCards with the new cards
-							  for(int i = 0; i < savedCards.size(); i++) {
-								  for(int j = 0; j < changeCards.size(); j++) {
-									  if(savedCards.get(i).equals(changeCards.get(j))) {
-										  savedCards.remove(i);
-										  savedCards.add(newCards.get(newCardCounter));
-										  newCardCounter++;
-									  }
-								  }
-							  }
+							  List<Card> savedCards = hands.get(gd.getUsername());
 							  
+							  int timeRan = 0;
+							  //remove the cards
+							  for(String c : cards) {
+								  //replace each card
+								  int index = Integer.parseInt(c);
+								  savedCards.remove(index - timeRan);
+								  timeRan++;
+							  }
+							  //replace the cards
+							  for(int i = 0; i < timeRan; i++) {
+								  savedCards.add(generateCards(1).get(0));
+							  }
 							  //save saved cards back to hands and tell the client about their cards
 							  hands.put(gd.getUsername(), savedCards);
 							  
 							  //turn hand into string
-							//Generate the String Array
-							  String[] stringCards = new String[hands.get(gd.getUsername()).size()];
-							  for(int i = 0; i < stringCards.length; i++) {
-								  stringCards[i] = hands.get(gd.getUsername()).get(i).getCardType();
+							  //Generate the String Array
+							  for(int i = 0; i < cards.length; i++) {
+								  cards[i] = hands.get(gd.getUsername()).get(i).getCardType();
+								  
+								  
+								  //send the specific card data
+								  String card = "updateUserCard:";
+								  card = card + i +",";
+								  //locate the card path
+								  String[] cardData = cards[i].split(",");
+								  //fix cardData[1] with king, queen, jack, or ace
+								  if(cardData[1].contains("11")) {
+									  cardData[1] = "jack";
+								  }else if(cardData[1].contains("12")) {
+									  cardData[1] = "queen";
+								  }else if(cardData[1].contains("13")) {
+									  cardData[1] = "king";
+								  }else if(cardData[1].contains("14")) {
+									  cardData[1] = "ace";
+								  }
+								  String cardPath = "/Cards/"+cardData[1]+"_of_"+cardData[0].toLowerCase()+".png";
+								  card += cardPath;
+								  
+								  //give the cards
+								  updatePlayer(card,arg1);
+								  
 							  }
-							  updatePlayer(stringCards, arg1);
 							  
-							  gd.setCardsSwapped(changeCards.size());
+							  gd.setCardsSwapped(cards.length);
 							  //update all players
 							  updatePlayers(participantsInRound);
 							  break;
 						  }
 					  }
+					  latch.countDown();
 					  break;
 				  case phase.Bet:
 					  //update the GameData with the bet and then update everybody about it
@@ -278,8 +278,8 @@ public class Server extends AbstractServer{
 					  }
 					  
 					  updatePlayers(participantsInRound);
+					  latch.countDown();
 					  break;
-				  }
 				  }
 			  }
 			  if(arg0 instanceof Map) {
@@ -319,27 +319,29 @@ public class Server extends AbstractServer{
 			  //buy in
 			  updatePlayers("Buy in " + buyInCost);
 			  gamePhase = phase.Buy;
-			  latch.countDown();
 			  latch.await();
+			  
+			  latch = new CountDownLatch(participantsInRound.size());
 			  //update the players on who is playing
 			  updatePlayers(participantsInRound);
 			  
 			  //change cards
 			  updatePlayers("Change cards");
 			  gamePhase = phase.Change;
-			  latch.countDown();
 			  latch.await();
+			  
+			  latch = new CountDownLatch(participantsInRound.size());
 			  //betting phase
-			  updatePlayers("Bet");
+			  updatePlayers("Bet ");
 			  gamePhase = phase.Bet;
-			  latch.countDown();
 			  latch.await();
+			  
+			  latch = new CountDownLatch(participantsInRound.size());
 			  //judging phase
 			  String winner = decideWinner();
 			  
 			  updatePlayers("Winner is " + winner);
 			  gamePhase = phase.Judge;
-			  latch.countDown();
 			  latch.await();
 		  }
 	  }
