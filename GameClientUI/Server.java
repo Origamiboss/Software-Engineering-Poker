@@ -3,6 +3,11 @@ package GameClientUI;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -22,7 +27,7 @@ public class Server extends AbstractServer{
 	  private ArrayList<ConnectionToClient> clients;
 	  private ArrayList<GameData> participantsInRound;
 	  //The Participants Cards
-	  private Map<String, Card[]> hands;
+	  private Map<String, List<Card>> hands;
 	  
 	  //how a latch works is that it will count down from a number before moving on
 	  private CountDownLatch latch = new CountDownLatch(0);
@@ -140,7 +145,12 @@ public class Server extends AbstractServer{
 					  //generate a hand for the client
 					  hands.put(clientData.getUsername(), generateCards());
 					  //send the client their new hand
-					  updatePlayer(hands.get(clientData),arg1);
+					  //Generate the String Array
+					  String[] cards = new String[hands.get(clientData.getUsername()).size()];
+					  for(int i = 0; i < cards.length; i++) {
+						  cards[i] = hands.get(clientData.getUsername()).get(i).getCardType();
+					  }
+					  updatePlayer(cards,arg1);
 					  
 					  break;
 				  case phase.Bet:
@@ -169,41 +179,42 @@ public class Server extends AbstractServer{
 						  if(gd.getUsername().equals(username)) {
 							  //replace their cards
 							  //Gather the card records
-							  Card[] savedCards = hands.get(gd);
+							  List<Card> savedCards = hands.get(gd);
 							  //Generate new Cards
-							  Card[] newCards = generateCards(cards.length);
+							  List<Card> newCards = generateCards(cards.length);
 							  int newCardCounter = 0;
 							  //Create dummy cards
-							  Card[] changeCards = new Card[cards.length];
-							  for(int i=0; i< changeCards.length; i++) {
+							  List<Card> changeCards = null;
+							  for(int i=0; i< newCards.size(); i++) {
 								  String[] cardData = cards[i].split("|");
 								  Card.Suit suit;
-								  switch(cardData[0]) {
-								  case "Dimond":
-									  suit = Card.Suit.Dimond;
+								  switch(cardData[0].toLowerCase()) {
+								  case "diamond":
+									  suit = Card.Suit.DIAMOND;
 									  break;
-								  case "Heart":
-									  suit = Card.Suit.Heart;
+								  case "heart":
+									  suit = Card.Suit.HEART;
 									  break;
-								  case "Clover":
-									  suit = Card.Suit.Clover;
+								  case "clover":
+									  suit = Card.Suit.CLOVER;
 									  break;
-								  case "Spade":
-									  suit = Card.Suit.Spade;
+								  case "spade":
+									  suit = Card.Suit.SPADE;
 									  break;
 								  default:
-									  suit = Card.Suit.Dimond;
+									  suit = Card.Suit.DIAMOND;
 								  }
 								  //assign the type of card
 								  int type = Integer.parseInt(cardData[1]);
 								  
-								  changeCards[i] = new Card(suit,type);
+								  changeCards.add(new Card(suit,type));
 							  }
 							  //now replace the savedCards with the new cards
-							  for(int i = 0; i < savedCards.length; i++) {
-								  for(int j = 0; j < changeCards.length; j++) {
-									  if(savedCards[i].equals(changeCards[j])) {
-										  savedCards[i] = newCards[newCardCounter];
+							  for(int i = 0; i < savedCards.size(); i++) {
+								  for(int j = 0; j < changeCards.size(); j++) {
+									  if(savedCards.get(i).equals(changeCards.get(j))) {
+										  savedCards.remove(i);
+										  savedCards.add(newCards.get(newCardCounter));
 										  newCardCounter++;
 									  }
 								  }
@@ -211,9 +222,16 @@ public class Server extends AbstractServer{
 							  
 							  //save saved cards back to hands and tell the client about their cards
 							  hands.put(gd.getUsername(), savedCards);
-							  updatePlayer(savedCards, arg1);
 							  
-							  gd.setCardsSwapped(changeCards.length);
+							  //turn hand into string
+							//Generate the String Array
+							  String[] stringCards = new String[hands.get(gd.getUsername()).size()];
+							  for(int i = 0; i < stringCards.length; i++) {
+								  stringCards[i] = hands.get(gd.getUsername()).get(i).getCardType();
+							  }
+							  updatePlayer(stringCards, arg1);
+							  
+							  gd.setCardsSwapped(changeCards.size());
 							  //update all players
 							  updatePlayers(participantsInRound);
 							  break;
@@ -302,61 +320,149 @@ public class Server extends AbstractServer{
 	  private String decideWinner() {
 		  String winner = "";
 		  int[] handValues = new int[participantsInRound.size()];
+		  //keep track of highest card type
+		  HashMap<String, Card.Suit> types = new HashMap<>();
 		  for(int i = 0; i < handValues.length; i++) {
-			  Card[] hand = hands.get(participantsInRound.get(i).getUsername());
+			  List<Card> hand = hands.get(participantsInRound.get(i).getUsername());
 			  //find the point value of the hand
+			  //Scoring system
+			  //0-garbage
+			  //20-pair
+			  //40-2Pair
+			  //60-3 of kind
+			  //80-straight
+			  //100-flush
+			  //120- full house
+			  //140- four of kind
+			  //160-straight flush
+			  //180- royale flush
+			  switch(PokerHandEvaluator.evaluateHand(hand)) {
+			  
+			  }
+			  
+			  
+			  
 		  }
 		  
 		  return winner;
 	  }
 	  //generate a whole new hand
-	  private Card[] generateCards() {
-		  Card[] hand = new Card[5];
+	  private List<Card> generateCards() {
+		  List<Card> hand = null;
 		  
 		  
 		  return hand;
 	  }
 	  //generate a couple new cards
-	  private Card[] generateCards(int amount) {
-		  Card[] hand = new Card[amount];
+	  private List<Card> generateCards(int amount) {
+		  List<Card> hand = null;
 		  
 		  
 		  return hand;
 	  }
 	  //create a card class to hold the card types
 	  private class Card {
-		  public enum Suit{
-			  Dimond,Heart,Clover,Spade
-		  }
-		  private Suit suit;
-		  private int value;
-		  public Card(Suit suit, int value){
-			  this.suit = suit;
-			  this.value = value;
-		  }
-		  public void setCardType(Suit suit, int value) {
-			  this.suit = suit;
-			  this.value = value;
-		  }
-		  public String getCardType() {
-			  String cardType = "";
-			  
-			  switch(suit) {
-			  case Suit.Dimond:
-				  cardType += "Dimond,";
-				  break;
-			  case Suit.Heart:
-				  cardType += "Heart,";
-				  break;
-			  case Suit.Clover:
-				  cardType += "Clover,";
-				  break;
-			  case Suit.Spade:
-				  cardType += "Spade,";
-				  break;
-			  }
-			  
-			  return cardType;
-		  }
+		  enum Suit {
+		        DIAMOND, HEART, CLOVER, SPADE
+		    }
+
+		    private Suit suit;
+		    private int value;
+
+		    public Card(Suit suit, int value) {
+		        this.suit = suit;
+		        this.value = value;
+		    }
+
+		    public Suit getSuit() {
+		        return suit;
+		    }
+
+		    public int getValue() {
+		        return value;
+		    }
+
+		    public String getCardType() {
+		        return this.suit + "," + this.value;
+		    }
 	  }
+	  
+	  
+	  public class PokerHandEvaluator {
+
+		    public static String evaluateHand(List<Card> cards) {
+		        // Sort the cards by value (Ace = 14, King = 13, ..., 2 = 2)
+		        cards.sort(Comparator.comparingInt(Card::getValue));
+
+		        // Check if all cards have the same suit (Flush)
+		        boolean isFlush = cards.stream().allMatch(card -> card.getSuit() == cards.get(0).getSuit());
+
+		        // Check if the values are consecutive (Straight)
+		        boolean isStraight = cards.get(4).getValue() - cards.get(0).getValue() == 4 && 
+		                             new HashSet<>(Arrays.asList(cards.get(0).getValue(), cards.get(1).getValue(),
+		                                                          cards.get(2).getValue(), cards.get(3).getValue(),
+		                                                          cards.get(4).getValue())).size() == 5;
+
+		        // Check if Ace is used as low (Ace can be 1 for A, 2, 3, 4, 5 straight)
+		        boolean isLowAceStraight = cards.get(0).getValue() == 2 && cards.get(1).getValue() == 3 && 
+		                                   cards.get(2).getValue() == 4 && cards.get(3).getValue() == 5 && 
+		                                   cards.get(4).getValue() == 14;
+
+		        if (isLowAceStraight) {
+		            cards.get(0).value = 1; // Treat Ace as 1 for the straight (A, 2, 3, 4, 5)
+		        }
+
+		        // Count occurrences of values
+		        Map<Integer, Integer> valueCounts = new HashMap<>();
+		        for (Card card : cards) {
+		            valueCounts.put(card.getValue(), valueCounts.getOrDefault(card.getValue(), 0) + 1);
+		        }
+
+		        if (isFlush && isStraight) {
+		            return isRoyalFlush(cards) ? "Royal Flush" : "Straight Flush";
+		        } else if (isFourOfAKind(valueCounts)) {
+		            return "Four of a Kind";
+		        } else if (isFullHouse(valueCounts)) {
+		            return "Full House";
+		        } else if (isFlush) {
+		            return "Flush";
+		        } else if (isStraight) {
+		            return "Straight";
+		        } else if (isThreeOfAKind(valueCounts)) {
+		            return "Three of a Kind";
+		        } else if (isTwoPair(valueCounts)) {
+		            return "Two Pair";
+		        } else if (isOnePair(valueCounts)) {
+		            return "One Pair";
+		        } else {
+		            return "High Card";
+		        }
+		    }
+
+		    private static boolean isRoyalFlush(List<Card> cards) {
+		        return cards.get(0).getValue() == 10 && cards.get(1).getValue() == 11 && 
+		               cards.get(2).getValue() == 12 && cards.get(3).getValue() == 13 && 
+		               cards.get(4).getValue() == 14;
+		    }
+
+		    private static boolean isFourOfAKind(Map<Integer, Integer> valueCounts) {
+		        return valueCounts.containsValue(4);
+		    }
+
+		    private static boolean isFullHouse(Map<Integer, Integer> valueCounts) {
+		        return valueCounts.containsValue(3) && valueCounts.containsValue(2);
+		    }
+
+		    private static boolean isThreeOfAKind(Map<Integer, Integer> valueCounts) {
+		        return valueCounts.containsValue(3);
+		    }
+
+		    private static boolean isTwoPair(Map<Integer, Integer> valueCounts) {
+		        return valueCounts.values().stream().filter(count -> count == 2).count() == 2;
+		    }
+
+		    private static boolean isOnePair(Map<Integer, Integer> valueCounts) {
+		        return valueCounts.containsValue(2);
+		    }
+		}
 }
