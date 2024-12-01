@@ -125,7 +125,8 @@ public class GameClientUI extends JPanel {
 
         JPanel actionPanel = new JPanel(new GridLayout(2, 4, 10, 10));
 
-        
+        userBalanceLabel = new JLabel("Enter bet or raise amount: ");
+        actionPanel.add(userBalanceLabel);
 
         betAmountField = new JTextField();
         actionPanel.add(betAmountField);
@@ -137,13 +138,14 @@ public class GameClientUI extends JPanel {
         JButton buyInButton = new JButton("Buy in");
         buyInButton.addActionListener(new BuyInButtonListener());
         actionPanel.add(buyInButton);
+        
+        userBalanceLabel = new JLabel("Balance: $0", SwingConstants.CENTER);
+        actionPanel.add(userBalanceLabel);
 
         JButton foldButton = new JButton("Fold");
         foldButton.addActionListener(new FoldButtonListener());
         actionPanel.add(foldButton);
 
-        userBalanceLabel = new JLabel("Balance: $0", SwingConstants.CENTER);
-        actionPanel.add(userBalanceLabel);
 
         JButton endTurnButton = new JButton("End Turn");
         endTurnButton.addActionListener(new EndTurnButtonListener());
