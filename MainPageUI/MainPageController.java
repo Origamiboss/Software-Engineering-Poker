@@ -1,7 +1,9 @@
 package MainPageUI;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import sweProject.Database;
 import sweProject.MainControl;
 
 public class MainPageController extends JPanel {
@@ -10,12 +12,14 @@ public class MainPageController extends JPanel {
 	private MainPageGUI mainpage;
 	private HostGameUI hostpage;
 	private JoinGameUI joinpage;
+	private Database db;
 	static int sizex = 500;
 	static int sizey = 500;
 	
-	public MainPageController(MainControl mainControl){
+	public MainPageController(MainControl mainControl, Database db){
 		this.setSize(sizex,sizey);
 		this.main = mainControl;
+		this.db = db;
 		mainpage = new MainPageGUI(this);
 		hostpage = new HostGameUI(this);
 		joinpage = new JoinGameUI(this);
@@ -66,5 +70,25 @@ public class MainPageController extends JPanel {
 				joinpage.setErrorText("Invalid Address");
 		}
 		
+	}
+	public void logOff() {
+		main.setPlayer(null);
+		main.openInitial();
+	}
+	public void removeAccount() {
+		// Show a confirmation dialog
+        int result = JOptionPane.showConfirmDialog(
+                null, // Parent component (null means no parent)
+                "Are you sure you want to delete your account?", // Message
+                "Confirm Deletion", // Title of the dialog box
+                JOptionPane.YES_NO_OPTION, // Options: Yes or No
+                JOptionPane.QUESTION_MESSAGE); // Message type
+
+        // Handle the user's response
+        if (result == JOptionPane.YES_OPTION) {
+            db.removePlayer(main.getPlayer());
+            main.openInitial();
+            // Perform the action (e.g., delete the item)
+        } 
 	}
 }

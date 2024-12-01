@@ -98,6 +98,10 @@ public class LoginUI extends JPanel{
 					LoginData data = new LoginData();
 					data.setUsername(username.getText());
 					data.setPassword(password.getText());
+					//reset the text fields
+					writeErrorMsg("");
+					username.setText("");
+					password.setText("");
 					controller.VerifyAccount(data);
 				}else {
 					//error occured

@@ -15,6 +15,7 @@ public class MainPageGUI extends JPanel {
 	private JButton joinButton;
 	private JButton hostButton;
 	private JButton escapeButton;
+	private JButton removeAccount;
 	
 	MainPageGUI(MainPageController parent){
 		control = parent;
@@ -26,22 +27,24 @@ public class MainPageGUI extends JPanel {
 		
 		//set up the main page
 		JPanel holder = new JPanel();
-		escapeButton = new JButton("Escape");
+		escapeButton = new JButton("Log Off");
+		removeAccount = new JButton("Delete Account");
 		holder.add(escapeButton);
-		this.add(holder, BorderLayout.NORTH);
+		holder.add(removeAccount);
+		this.add(holder, BorderLayout.CENTER);
 		
 		holder = new JPanel();
 		joinButton = new JButton("Join Game");
 		hostButton = new JButton("Host Game");
 		holder.add(joinButton);
 		holder.add(hostButton);
-		this.add(holder,BorderLayout.CENTER);
+		this.add(holder,BorderLayout.NORTH);
 		
 		
 		joinButton.addActionListener(new EventHandler());
 		hostButton.addActionListener(new EventHandler());
 		escapeButton.addActionListener(new EventHandler());
-		
+		removeAccount.addActionListener(new EventHandler());
 		
 		
 	}
@@ -58,6 +61,11 @@ public class MainPageGUI extends JPanel {
 			}
 			if(e.getSource() == escapeButton) {
 				//open the escape page
+				control.logOff();
+			}
+			if(e.getSource() == removeAccount) {
+				//remove the account
+				control.removeAccount();
 			}
 		}
 	}

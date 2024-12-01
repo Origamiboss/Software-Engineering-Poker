@@ -31,7 +31,7 @@ public class MainControl extends JFrame{
     public MainControl() {
 		db = new Database();
         initial = new InitialPageController(this);
-        main = new MainPageController(this);
+        main = new MainPageController(this,db);
         account = new NewAccountController(this, db);
         gameClient = new GameClientControllerPanel(this);
         login = new LoginController(this,db);
@@ -89,6 +89,9 @@ public class MainControl extends JFrame{
 	
 	public void setPlayer(Player p) {
 		player = p;
+	}
+	public Player getPlayer() {
+		return player;
 	}
 	//Host Game and Create Client
 	public void HostGame(int port) {

@@ -100,6 +100,11 @@ public class NewAccountUI extends JPanel{
 					LoginData data = new LoginData();
 					data.setUsername(username.getText());
 					data.setPassword(password.getText());
+					//reset fields
+					writeErrorMsg("");
+					username.setText("");
+					password.setText("");
+					passwordAgain.setText("");
 					controller.CreateAccount(data);
 				}else {
 					//error occured

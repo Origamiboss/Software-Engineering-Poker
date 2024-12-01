@@ -60,7 +60,17 @@ public class Database {
 	}
 	
 	public void removePlayer(Player player) {
-		
+		//gather data
+		LoginData l = player.getLoginData();
+		String username = l.getUsername();
+		String password = l.getPassword();
+		int wealth = player.getWealth();
+		try {
+			executeDML("DELETE FROM player WHERE username='" +username+"' AND password='" + password + "'");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void addPlayer(Player player ) {
