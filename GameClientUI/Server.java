@@ -2,6 +2,7 @@ package GameClientUI;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +21,7 @@ import ocsf.server.*;
 
 import sweProject.GameData;
 
-public class Server extends AbstractServer{
+public class Server extends AbstractServer {
 	// Data fields for this Server.
 	  private JTextArea log;
 	  private JLabel status;
@@ -423,7 +424,6 @@ public class Server extends AbstractServer{
 		  //run the game until there is 1 player left
 		  while(players.size() > 1) {
 			  pot = 0;
-			  updatePot();
 			  participantsInRound.clear();
 			  //Give All Players the GameData
 			  updatePlayers(players);
@@ -447,7 +447,6 @@ public class Server extends AbstractServer{
 			  gamePhase = phase.Bet;
 			  latch.await();
 			  
-			  System.out.println("Judging Time");
 			  updatePlayers(participantsInRound);
 			  
 			  latch = new CountDownLatch(participantsInRound.size());
@@ -455,6 +454,19 @@ public class Server extends AbstractServer{
 			  String winner = decideWinner();
 			  
 			  updatePlayers("Winner is " + winner);
+			  /*Thread.sleep(1000);
+			  //send them all of the cards
+			  
+			  for(GameData gd : participantsInRound) {
+				  String data = "showCards:";
+				  data += gd.getUsername() +";";
+				  for(Card c : hands.get(gd.getUsername())) {
+					  data += c.getCardType() + ":";
+				  }
+				  data = data.substring(0, data.length() - 1);
+				  updatePlayers(data);
+				  Thread.sleep(1000);
+			  }*/
 			  gamePhase = phase.Judge;
 			  //latch.await();
 		  }
@@ -637,7 +649,8 @@ public class Server extends AbstractServer{
 		  return hand;
 	  }
 	  //create a card class to hold the card types
-	  private class Card {
+	  public class Card implements Serializable{
+		  private static final long serialVersionUID = 1L;  // Unique identifier for the Serializable class
 		  enum Suit {
 		        DIAMONDS, HEARTS, CLUBS, SPADES
 		    }

@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.JPanel;
 
+import GameClientUI.Server.Card;
 import ocsf.client.AbstractClient;
 import sweProject.GameData;
 import sweProject.MainControl;
@@ -47,6 +50,33 @@ public class GameClientController extends AbstractClient{
 				}
 	        }
 	    });
+	}
+	private void socketChecker() {
+		while(status == "Hosting" || status == "Joining") {
+			//run while game exists
+			try {
+	            // Check if the socket is connected
+	            if (!isConnected()) {
+	                System.out.println("Socket is closed or disconnected. Attempting to reconnect...");
+	                
+	                // Try reconnecting to the server
+	                try {
+	                    openConnection();
+	                    System.out.println("Reconnected to the server.");
+	                } catch (IOException e) {
+	                    // If reconnection fails, wait before retrying
+	                    System.out.println("Reconnection failed. Retrying in 5 seconds...");
+	                    Thread.sleep(5000); // Retry after 5 seconds
+	                }
+	            }
+	            
+	            // Sleep for a while before checking again
+	            Thread.sleep(1000); // Check every 1 second
+	            
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 	public void HostGame(int port) throws IOException {
 		//Create a server and accompanying UI
@@ -146,21 +176,24 @@ public class GameClientController extends AbstractClient{
 		else {
 			//the Game has started
 			if(arg0 instanceof ArrayList<?>) {
-				ArrayList<GameData> gameDataList = (ArrayList<GameData>) arg0;
-				//update initial
-				gameui.updatePlayerPanel(gameDataList);
-				//update myself
-				for(GameData gd : gameDataList) {
-					if(gd.getUsername().equals(myData.getUsername())) {
-						myData.update(gd);
+				ArrayList<?> list = (ArrayList<?>) arg0;
+				if(list.get(0) instanceof GameData) {
+					ArrayList<GameData> gameDataList = (ArrayList<GameData>) list;
+					//update initial
+					gameui.updatePlayerPanel(gameDataList);
+					//update myself
+					for(GameData gd : gameDataList) {
+						if(gd.getUsername().equals(myData.getUsername())) {
+							myData.update(gd);
+						}
 					}
-				}
-				//send the dictionary back
-				try {
-					sendToServer(gameui.playerIdDictionary);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//send the dictionary back
+					try {
+						sendToServer(gameui.playerIdDictionary);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			
@@ -184,6 +217,13 @@ public class GameClientController extends AbstractClient{
 	            	//tell the client its time to change
 	            	gameui.judge(message);
 	            }
+	            if(message.startsWith("showCards:")) {
+	            	String msg = message.split("showCards:")[1];
+	            	String username = msg.split(";")[0];
+	            	String other = msg.split(";")[1];
+	            	String[] CardData = other.split(":");
+	            	gameui.showAllCards(username,CardData);
+	            }
 	            if(message.startsWith("Pot:")) {
 	            	gameui.updatePot(message.split("Pot:")[1]);
 	            }
@@ -198,7 +238,6 @@ public class GameClientController extends AbstractClient{
                     int cardIndex = Integer.parseInt(parts[0].trim());
                     String newCardImagePath = parts[1].trim();
                     gcp.updateUserCard(cardIndex, newCardImagePath);
-                    System.out.println("test");
 	            }
 	            if (message.startsWith("updatePot:")) 
 	            {
@@ -244,33 +283,7 @@ public class GameClientController extends AbstractClient{
 	        }
 		}
 	}
-	private void socketChecker() {
-		while(status == "Hosting" || status == "Joining") {
-			//run while game exists
-			try {
-	            // Check if the socket is connected
-	            if (!isConnected()) {
-	                System.out.println("Socket is closed or disconnected. Attempting to reconnect...");
-	                
-	                // Try reconnecting to the server
-	                try {
-	                    openConnection();
-	                    System.out.println("Reconnected to the server.");
-	                } catch (IOException e) {
-	                    // If reconnection fails, wait before retrying
-	                    System.out.println("Reconnection failed. Retrying in 5 seconds...");
-	                    Thread.sleep(5000); // Retry after 5 seconds
-	                }
-	            }
-	            
-	            // Sleep for a while before checking again
-	            Thread.sleep(1000); // Check every 1 second
-	            
-	        } catch (InterruptedException e) {
-	            e.printStackTrace();
-	        }
-	    }
-	}
+	
 	public void exit() {
 		switch(status) {
 		case "Hosting":

@@ -2,6 +2,7 @@ package GameClientUI;
 
 import javax.swing.*;
 
+import GameClientUI.Server.Card;
 import GameClientUI.Server.PokerHandEvaluator;
 import sweProject.GameData;
 
@@ -34,6 +35,7 @@ public class GameClientUI extends JPanel {
     private GameClientController gc;
     
     private ArrayList<Integer> cardsToChange;
+    
     
     private enum stageOfGame{
     	BUYIN,CHANGE,BET,JUDGE,NONE
@@ -255,7 +257,6 @@ public class GameClientUI extends JPanel {
 	            updatePlayerChanged(Ids, gd.getCardsSwapped());
 	            Ids++;
 	            playerPanel.add(playerView);  
-	            
     		}else {
     			//if it is me
     			updateUserBalance(gd.getTotalMoneyAmount());
@@ -276,10 +277,30 @@ public class GameClientUI extends JPanel {
     }
     public void judge(String msg) {
     	stage = stageOfGame.JUDGE;
-    	//reset all cards
-    	for(int i = 0; i < 5; i++) {
-    		updateUserCard(i,"/Cards/back.png");
-    	}
+    	//show winning message
+    	potLabel.setText(msg);
+    }
+    public void showAllCards(String u, String[] hand) {
+    	
+		int id = playerIdDictionary.get(u);
+		for(int i = 0; i<hand.length; i++) {
+			  //send the specific card data
+			  //locate the card path
+			  String[] cardData = hand[i].split(",");
+			  //fix cardData[1] with king, queen, jack, or ace
+			  if(cardData[1].contains("11")) {
+				  cardData[1] = "jack";
+			  }else if(cardData[1].contains("12")) {
+				  cardData[1] = "queen";
+			  }else if(cardData[1].contains("13")) {
+				  cardData[1] = "king";
+			  }else if(cardData[1].contains("14")) {
+				  cardData[1] = "ace";
+			  }
+			  String cardPath = "/Cards/"+cardData[1]+"_of_"+cardData[0].toLowerCase()+".png";
+			  //update card
+			  updatePlayerCard(id, i, cardPath);
+		}
     }
     private class ChangeCardListener implements ActionListener {
         @Override
