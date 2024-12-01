@@ -137,6 +137,13 @@ public class GameClientController extends AbstractClient{
 				ArrayList<GameData> gameDataList = (ArrayList<GameData>) arg0;
 				//update initial
 				gameui.updatePlayerPanel(gameDataList);
+				int amount = 0;
+				for(GameData gdl : gameDataList) {
+					amount += gdl.getBettedMoney();
+				}
+				//update the pot
+				gameui.updatePot(amount);
+				
 				//send the dictionary back
 				try {
 					sendToServer(gameui.playerIdDictionary);
@@ -263,6 +270,22 @@ public class GameClientController extends AbstractClient{
 	public void buyIn() {
 		try {
 			sendToServer(myData);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void bet(int betAmount) {
+		try {
+			sendToServer("Bet:" + myData.getUsername() + "," + betAmount);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void fold() {
+		try {
+			sendToServer("Fold:" + myData.getUsername());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

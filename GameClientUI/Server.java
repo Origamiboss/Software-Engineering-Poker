@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,6 +47,8 @@ public class Server extends AbstractServer{
 	  
 	  //How much is the buy in cost
 	  static private int buyInCost = 10;
+	  //highest better
+	  private int highestBetter = 0;
 	  
 	  // Constructor for initializing the server with default settings.
 	  public Server(int port)
@@ -198,43 +201,43 @@ public class Server extends AbstractServer{
 					  //Message should be "Username:1,2,3"
 					  //split the msg into username and cards
 					  String username = msg.split(":")[0];
-					  System.out.println(username);
 					  String cardMessage = msg.split(":")[1];
-					  System.out.println(cardMessage);
 					  String[] cards = cardMessage.split(",");
-					  System.out.println(cards);
 					  //locate which player wants to replace their cards
 					  for(GameData gd : participantsInRound) {
 						  if(gd.getUsername().equals(username)) {
-							  //replace their cards
 							  List<Card> savedCards = hands.get(gd.getUsername());
-							  
-							  int timeRan = 0;
-							  //remove the cards
-							  for(String c : cards) {
-								  //replace each card
-								  int index = Integer.parseInt(c);
-								  savedCards.remove(index - timeRan);
-								  timeRan++;
-							  }
-							  //replace the cards
-							  for(int i = 0; i < timeRan; i++) {
-								  savedCards.add(generateCards(1).get(0));
-							  }
-							  //save saved cards back to hands and tell the client about their cards
-							  hands.put(gd.getUsername(), savedCards);
-							  
+						        
+						        // Remove the cards, iterating in reverse order
+						        List<Integer> indicesToRemove = new ArrayList<>();
+						        for (String c : cards) {
+						            int index = Integer.parseInt(c);
+						            indicesToRemove.add(index);
+						        }
+						        // Remove cards safely by iterating in reverse order to prevent index shifting issues
+						        Collections.sort(indicesToRemove, Collections.reverseOrder());
+						        for (int index : indicesToRemove) {
+						            savedCards.remove(index);
+						        }
+
+						        // Add new cards
+						        savedCards.addAll(generateCards(cards.length));
+						        
+						        // Save the updated cards
+						        hands.put(gd.getUsername(), savedCards);
 							  //turn hand into string
 							  //Generate the String Array
-							  for(int i = 0; i < cards.length; i++) {
-								  cards[i] = hands.get(gd.getUsername()).get(i).getCardType();
+							  int i = 0;
+							  for(Card c : hands.get(gd.getUsername())) {
+								  
 								  
 								  
 								  //send the specific card data
 								  String card = "updateUserCard:";
 								  card = card + i +",";
+								  i++;
 								  //locate the card path
-								  String[] cardData = cards[i].split(",");
+								  String[] cardData = c.getCardType().split(",");
 								  //fix cardData[1] with king, queen, jack, or ace
 								  if(cardData[1].contains("11")) {
 									  cardData[1] = "jack";
@@ -253,7 +256,7 @@ public class Server extends AbstractServer{
 								  
 							  }
 							  
-							  gd.setCardsSwapped(cards.length);
+							  gd.setCardsSwapped(i);
 							  //update all players
 							  updatePlayers(participantsInRound);
 							  break;
@@ -263,25 +266,61 @@ public class Server extends AbstractServer{
 					  break;
 				  case phase.Bet:
 					  //update the GameData with the bet and then update everybody about it
-					  
+					  //Example msg = "Bet:username,amount"
 					  if(msg.contains("Bet:")) {
-						  msg = msg.split("Bet:")[0];
+						  msg = msg.split("Bet:")[1];
 						  String[] data = msg.split(",");
+						  int bettedMoney = Integer.parseInt(data[1]);
 						  for(GameData gd : participantsInRound) {
-							  if(gd.getUsername().equals(data[0]) && gd.getTotalMoneyAmount() >= Integer.parseInt(data[1])) {
-								  int bettedMoney = Integer.parseInt(data[1]);
-								  gd.setBettedMoney(gd.getBettedMoney() + bettedMoney);
-								  gd.setTotalMoneyAmount(gd.getTotalMoneyAmount() - bettedMoney);
-								  break;
-							  }
+							  	System.out.println(data[1]);
+						        System.out.println(gd.getUsername() + ":" + data[0]);
+						        
+						        // Check if the player exists and has enough money
+						        if (gd.getUsername().equals(data[0]) && gd.getTotalMoneyAmount() >= bettedMoney && bettedMoney > 0 && bettedMoney + gd.getBettedMoney() >= highestBetter) {
+						            // Remove the bet amount from the player's total money
+						            gd.setTotalMoneyAmount(gd.getTotalMoneyAmount() - bettedMoney);
+
+						            // Add the player's previous bet to the new bet to get total bet
+						            bettedMoney += gd.getBettedMoney(); 
+
+						            // If the new bet is higher than the current highest, update the highest bet
+						            if (bettedMoney > highestBetter) {
+						                highestBetter = bettedMoney;
+						                latch = new CountDownLatch(participantsInRound.size());  // Reset latch for all players
+						            }
+
+						            // Update the player's bet with the new total bet
+						            gd.setBettedMoney(bettedMoney);
+
+						            // Broadcast updates to all players
+						            updatePlayers(participantsInRound);
+
+						            // Only count down the latch if the bet is valid
+						            latch.countDown();
+						            break;
+						        }
 						  }
 					  }
+					  if(msg.contains("Fold:")) {
+						  msg = msg.split("Fold:")[0];
+						  GameData rmgd = null;
+						  for(GameData gd : participantsInRound) {
+							  if(gd.getUsername().equals(msg)) {
+								  rmgd = gd;
+							  }
+						  }
+						  if(rmgd != null) {
+							  participantsInRound.remove(rmgd);
+						  }
+						  updatePlayers(participantsInRound);
+						  latch.countDown();
+						  
+					  }
 					  
-					  updatePlayers(participantsInRound);
-					  latch.countDown();
+					  
 					  break;
 				  }
-				  if(msg.contains("skip")) {
+				  if(gamePhase != phase.Bet && msg.contains("skip")) {
 					  latch.countDown();
 				  }
 			  }
@@ -335,9 +374,11 @@ public class Server extends AbstractServer{
 			  
 			  latch = new CountDownLatch(participantsInRound.size());
 			  //betting phase
+			  highestBetter = buyInCost;
 			  updatePlayers("Bet ");
 			  gamePhase = phase.Bet;
 			  latch.await();
+			  updatePlayers(participantsInRound);
 			  
 			  latch = new CountDownLatch(participantsInRound.size());
 			  //judging phase

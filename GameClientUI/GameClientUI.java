@@ -264,7 +264,6 @@ public class GameClientUI extends JPanel {
         public void actionPerformed(ActionEvent e) {
         	if(stage == stageOfGame.CHANGE) {
 	            int cardIndex = Integer.parseInt(e.getActionCommand());
-	            System.out.println("Card " + cardIndex + " change requested");
 	            // Notify controller or backend to handle card change
 	            if(cardsToChange.contains(cardIndex)) {
 	            	cardsToChange.remove(cardIndex);
@@ -281,10 +280,9 @@ public class GameClientUI extends JPanel {
         	//remove BUYIN once button is established
         	if(stage == stageOfGame.BET) {
 	            String betAmount = betAmountField.getText();
-	            System.out.println("Bet/Raise amount: " + betAmount);
 	            betAmountField.setText(""); // Clear text field
-	            //test
-	            stage = stageOfGame.NONE;
+	            gc.bet(Integer.parseInt(betAmount));
+	            
         	}
         }
     }
@@ -295,7 +293,6 @@ public class GameClientUI extends JPanel {
             
             // Handle fold action here
             if(stage == stageOfGame.BUYIN) {
-            	System.out.println("Player bought in.");
             	gc.buyIn();
 	            stage = stageOfGame.NONE;
             }
@@ -306,7 +303,6 @@ public class GameClientUI extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
         	if(stage == stageOfGame.BET) {
-	            System.out.println("Player has folded.");
 	            // Handle fold action here
 	            
 	            stage = stageOfGame.NONE;
