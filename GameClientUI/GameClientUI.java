@@ -180,7 +180,7 @@ public class GameClientUI extends JPanel {
         userBalanceLabel.setText("Balance: $" + balance);
     }
 
-    public void updatePot(int amount) {
+    public void updatePot(String amount) {
         potLabel.setText("Pot: $" + amount);
     }
 
@@ -349,7 +349,7 @@ public class GameClientUI extends JPanel {
             frame.setVisible(true);
 
             gameClientUI.updateUserBalance(500);
-            gameClientUI.updatePot(250);
+            gameClientUI.updatePot("250");
             gameClientUI.updatePlayerBalance(0, 300);
             gameClientUI.updatePlayerBet(0, 50);
             gameClientUI.updatePlayerStatus(0, "Folded");

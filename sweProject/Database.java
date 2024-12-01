@@ -100,7 +100,29 @@ public class Database {
 			return null;
 		}
 	}
-	
+	public Player findPlayerPassworded(String username, String password) {
+		//locate the first datafield
+		ArrayList<String> returnedData = query("SELECT username, password, wealth FROM player WHERE username = '" + username + "' AND password = '" + password + "'");
+
+		//check if there is data
+		if(returnedData != null) {
+			//Create the Player object
+			Player player =  new Player();
+			String[] playerData = returnedData.get(0).split(",");
+			
+			LoginData l = new LoginData();
+			l.setUsername(playerData[0]);
+			l.setPassword(playerData[1]);
+			player.setLoginData(l);
+			
+			player.setWealth(Integer.parseInt(playerData[2]));
+			
+			return player;
+		}else {
+			//there is no return data
+			return null;
+		}
+	}
 	  public ArrayList<String> query(String query)
 	  {
 	    //Variable Declaration/Initialization

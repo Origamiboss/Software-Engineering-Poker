@@ -16,7 +16,7 @@ public class InitialPageController extends JPanel{
 		this.add(ui);
 	}
 	public void openLoginPage() {
-		
+		main.openLogin();
 	}
 	public void openNewAccountPage() {
 		main.openNewAccount();

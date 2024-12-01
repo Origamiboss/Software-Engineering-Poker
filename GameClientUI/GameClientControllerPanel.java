@@ -58,7 +58,7 @@ public class GameClientControllerPanel extends JPanel {
         clientUI.updateUserCard(cardIndex, newCardImagePath);
     }
 
-    public void updatePot(int amount) {
+    public void updatePot(String amount) {
         clientUI.updatePot(amount);
     }
 

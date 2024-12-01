@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import GameClientUI.GameClientController;
 import GameClientUI.GameClientControllerPanel;
 import InitialPageUI.InitialPageController;
+import LoginPageUI.LoginController;
 import MainPageUI.MainPageController;
 import NewAccountUI.NewAccountController;
 import NewAccountUI.NewAccountTest;
@@ -22,6 +23,7 @@ public class MainControl extends JFrame{
     private MainPageController main;
     private NewAccountController account;
     private GameClientControllerPanel gameClient;
+    private LoginController login;
     private JPanel contentPanel;  // Container to hold the pages
     
     Player player;
@@ -32,7 +34,8 @@ public class MainControl extends JFrame{
         main = new MainPageController(this);
         account = new NewAccountController(this, db);
         gameClient = new GameClientControllerPanel(this);
-
+        login = new LoginController(this,db);
+        
         // Set up JFrame properties
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
@@ -47,7 +50,8 @@ public class MainControl extends JFrame{
         contentPanel.add(main, "Main");
         contentPanel.add(account, "Account");
         contentPanel.add(gameClient, "GameClient");
-
+        contentPanel.add(login, "Login");
+        
         // Add content panel to JFrame
         this.add(contentPanel, BorderLayout.CENTER);
 
@@ -74,7 +78,9 @@ public class MainControl extends JFrame{
     public void openGameClient() {
         showPage("GameClient");
     }
-
+    public void openLogin() {
+    	showPage("Login");
+    }
     // Helper method to switch pages using CardLayout
     private void showPage(String pageName) {
         CardLayout cl = (CardLayout) (contentPanel.getLayout());

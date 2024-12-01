@@ -48,7 +48,6 @@ public class GameClientController extends AbstractClient{
 		initial.setServerIp(ip);
 		//set up the client
 		
-		
 		setHost(ip);
 		setPort(port);
 		try
@@ -137,12 +136,6 @@ public class GameClientController extends AbstractClient{
 				ArrayList<GameData> gameDataList = (ArrayList<GameData>) arg0;
 				//update initial
 				gameui.updatePlayerPanel(gameDataList);
-				int amount = 0;
-				for(GameData gdl : gameDataList) {
-					amount += gdl.getBettedMoney();
-				}
-				//update the pot
-				gameui.updatePot(amount);
 				
 				//send the dictionary back
 				try {
@@ -173,6 +166,9 @@ public class GameClientController extends AbstractClient{
 	            	//tell the client its time to change
 	            	gameui.judge(message);
 	            }
+	            if(message.startsWith("Pot:")) {
+	            	gameui.updatePot(message.split("Pot:")[1]);
+	            }
 	            if (message.startsWith("updateUserBalance:")) 
 	            {
 	            	int balance = Integer.parseInt(message.split(":")[1].trim());
@@ -188,7 +184,7 @@ public class GameClientController extends AbstractClient{
 	            }
 	            if (message.startsWith("updatePot:")) 
 	            {
-	            	int amount = Integer.parseInt(message.split(":")[1].trim());
+	            	String amount = message.split(":")[1].trim();
 					gcp.updatePot(amount);
 	            }
 	            if (message.startsWith("updatePlayerBalance:"))
