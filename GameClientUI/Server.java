@@ -81,7 +81,8 @@ public class Server extends AbstractServer{
 		  
 			//tell the client to send their name
 			try {
-				client.sendToClient("Send your name");
+				if(gamePhase == phase.None)
+					client.sendToClient("Send your name");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -151,10 +152,17 @@ public class Server extends AbstractServer{
 			  if(arg0 instanceof GameData) {
 				  //turn the object into GameData
 				  GameData clientData = (GameData)arg0;
+				  //reset clientData
+				  for(GameData player : players) {
+					  if(player.getUsername().equals(clientData.getUsername()))
+						  clientData = player;
+				  }
 				  //Depending on the gamePhase, the different GameData will have different meanings
 				  switch(gamePhase) {
 				  case phase.Buy:
+					  
 					  if(clientData.getTotalMoneyAmount() >= buyInCost) {
+						  //connect the clientData with playerData
 						  clientData.setBettedMoney(buyInCost);
 						  clientData.setTotalMoneyAmount(clientData.getTotalMoneyAmount() - buyInCost);
 						  participantsInRound.add(clientData);
@@ -186,8 +194,11 @@ public class Server extends AbstractServer{
 							  card += cardPath;
 							  
 							  //give the cards
+							  
 							  updatePlayer(card,arg1);
 						  }
+						  pot += buyInCost;
+						  updatePot();
 					  }
 					  
 					  latch.countDown();
@@ -213,7 +224,6 @@ public class Server extends AbstractServer{
 						    // Locate which player wants to replace their cards
 						    for (GameData gd : participantsInRound) {
 						        if (gd.getUsername().equals(username)) {
-						        	System.out.println("hit3");
 						            List<Card> savedCards = hands.get(gd.getUsername());
 						            
 						            // Remove the cards, iterating in reverse order
@@ -264,7 +274,7 @@ public class Server extends AbstractServer{
 						                updatePlayer(card, arg1);
 						            }
 	
-						            gd.setCardsSwapped(i);
+						            gd.setCardsSwapped(indicesToRemove.size());
 						            // Update all players
 						            updatePlayers(participantsInRound);
 						            latch.countDown();
@@ -291,7 +301,7 @@ public class Server extends AbstractServer{
 						        if (gd.getUsername().equals(data[0]) && gd.getTotalMoneyAmount() >= bettedMoney && bettedMoney > 0 && bettedMoney + gd.getBettedMoney() >= highestBetter) {
 						            // Remove the bet amount from the player's total money
 						            gd.setTotalMoneyAmount(gd.getTotalMoneyAmount() - bettedMoney);
-
+						            pot+= bettedMoney;
 						            // Add the player's previous bet to the new bet to get total bet
 						            bettedMoney += gd.getBettedMoney(); 
 
@@ -311,12 +321,13 @@ public class Server extends AbstractServer{
 						            if(whoBetted >= participantsInRound.size())
 						            	latch.countDown();
 						            System.out.println("Latch Count After: " + latch.getCount());
+						            updatePot();
 						            break;
 						        }
 						  }
 					  }
-					  if(msg.contains("Fold:")) {
-						  msg = msg.split("Fold:")[0];
+					  if(msg.startsWith("Fold:")) {
+						  msg = msg.split("Fold:")[1];
 						  GameData rmgd = null;
 						  for(GameData gd : participantsInRound) {
 							  if(gd.getUsername().equals(msg)) {
@@ -332,7 +343,6 @@ public class Server extends AbstractServer{
 						  updatePlayers(participantsInRound);
 						  
 					  }
-					  
 					  break;
 						  
 				  }
@@ -340,6 +350,36 @@ public class Server extends AbstractServer{
 					  latch.countDown();
 					  //updatePlayers(participantsInRound);
 				  }
+
+				  if(msg.endsWith(" is leaving")) {
+					  //locate the username
+					  String user = msg.split(" is leaving")[0];
+					  for(GameData gd : players) {
+						  if(gd.getUsername().equals(user)) {
+							  //remove them from players
+							  players.remove(gd);
+							  break;
+						  }
+					  }
+					  //remove from participants
+					  for(GameData gd : participantsInRound) {
+						  if(gd.getUsername().equals(user)) {
+							  //remove them from players
+							  participantsInRound.remove(gd);
+							  break;
+						  }
+					  }
+					  //remove connection
+					  clients.remove(arg1);
+					  updatePlayers(players);
+					  //countdown the latch
+					  if(gamePhase != phase.Bet) {
+						  latch.countDown();
+						  System.out.println("Latch Left: " + latch.getCount());
+					  }
+				  }
+					  
+				  
 			  }
 			  if(arg0 instanceof Map) {
 				  //recieved playerId
@@ -353,6 +393,9 @@ public class Server extends AbstractServer{
 					  }
 				  }
 			  }
+		  }
+		  if(latch != null) {
+			  System.out.println("Latch Left: " + latch.getCount());
 		  }
 	  }
 	  public void StartGame() {
@@ -379,8 +422,9 @@ public class Server extends AbstractServer{
 		  
 		  //run the game until there is 1 player left
 		  while(players.size() > 1) {
+			  pot = 0;
 			  updatePot();
-			  participantsInRound = new ArrayList<>();
+			  participantsInRound.clear();
 			  //Give All Players the GameData
 			  updatePlayers(players);
 			  latch = new CountDownLatch(players.size());
@@ -392,7 +436,6 @@ public class Server extends AbstractServer{
 			  latch = new CountDownLatch(participantsInRound.size());
 			  //update the players on who is playing
 			  updatePlayers(participantsInRound);
-			  updatePot();
 			  //change cards
 			  updatePlayers("Change cards");
 			  gamePhase = phase.Change;
@@ -403,7 +446,6 @@ public class Server extends AbstractServer{
 			  updatePlayers("Bet ");
 			  gamePhase = phase.Bet;
 			  latch.await();
-			  updatePot();
 			  
 			  System.out.println("Judging Time");
 			  updatePlayers(participantsInRound);
@@ -442,19 +484,6 @@ public class Server extends AbstractServer{
 		  }
 	  }
 	  private void updatePot() {
-		  pot = 0;
-		  for(GameData pl : players) {
-			  for(GameData pa: participantsInRound) {
-				  //update
-				  if(pl.getUsername().equals(pa.getUsername())) {
-					  pl.update(pa);
-					  System.out.println(pl.getBettedMoney());
-				  }
-			  }
-		  }
-		  for(GameData p : players) {
-			  pot += p.getBettedMoney();
-		  }
 		  updatePlayers("Pot:" + pot);
 	  }
 	  private String decideWinner() {
@@ -488,23 +517,29 @@ public class Server extends AbstractServer{
 		        // Handle tie-breaking (e.g., comparing high cards)
 		        winner = resolveTie(potentialWinners);
 		    }
-		    //give the winner the pot
-		    for(GameData player : participantsInRound) {
-		    	if(player.getUsername().equals(winner)) {
-		    		player.setTotalMoneyAmount(player.getTotalMoneyAmount() + pot);
-		    		System.out.println("Winners funds = " + player.getTotalMoneyAmount());
-		    	}
-		    }
+		    
 		    //save all player data
 		    for(GameData pl : players) {
 				  for(GameData pa: participantsInRound) {
 					  //update
 					  if(pl.getUsername().equals(pa.getUsername())) {
-						  pl.update(pa);
+						  System.out.println(pl.getUsername() + " monet: " + pl.getTotalMoneyAmount());
+						  pl.setTotalMoneyAmount(pa.getTotalMoneyAmount());
 						  pl.setBettedMoney(0);
+						  pl.setCardsSwapped(0);
 					  }
 				  }
 			  }
+		    //give the winner the pot
+		    for(GameData player : participantsInRound) {
+		    	
+		    	if(player.getUsername().equals(winner)) {
+		    		player.setTotalMoneyAmount(player.getTotalMoneyAmount() + pot);
+		    		System.out.println("Winners funds = " + player.getTotalMoneyAmount());
+		    	}
+		    	System.out.println(player.getUsername() + " monet: " + player.getTotalMoneyAmount());
+		    }
+		    
 		    return winner;
 		}
 

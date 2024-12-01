@@ -34,6 +34,19 @@ public class GameClientController extends AbstractClient{
 		gameui = cli;
 		gameui.setGameClientController(this);
 		this.gcp = gcp;  
+		
+		//make the thread checker
+		Thread gameThread = new Thread(new Runnable() {
+	        @Override
+	        public void run() {
+	            try {
+					socketChecker();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
+	    });
 	}
 	public void HostGame(int port) throws IOException {
 		//Create a server and accompanying UI
@@ -57,7 +70,7 @@ public class GameClientController extends AbstractClient{
 	    }
 	    catch (IOException e)
 	    {
-	    	handleError(e.getLocalizedMessage());
+	    	e.printStackTrace();
 	    }
 		
 		
@@ -85,7 +98,7 @@ public class GameClientController extends AbstractClient{
 	    }
 	    catch (IOException e)
 	    {
-	      handleError(e.getLocalizedMessage());
+	      e.printStackTrace();
 	    }
 	}
 	// Method that handles messages from the server.
@@ -136,7 +149,12 @@ public class GameClientController extends AbstractClient{
 				ArrayList<GameData> gameDataList = (ArrayList<GameData>) arg0;
 				//update initial
 				gameui.updatePlayerPanel(gameDataList);
-				
+				//update myself
+				for(GameData gd : gameDataList) {
+					if(gd.getUsername().equals(myData.getUsername())) {
+						myData.update(gd);
+					}
+				}
 				//send the dictionary back
 				try {
 					sendToServer(gameui.playerIdDictionary);
@@ -226,8 +244,32 @@ public class GameClientController extends AbstractClient{
 	        }
 		}
 	}
-	private void handleError(String error) {
-		
+	private void socketChecker() {
+		while(status == "Hosting" || status == "Joining") {
+			//run while game exists
+			try {
+	            // Check if the socket is connected
+	            if (!isConnected()) {
+	                System.out.println("Socket is closed or disconnected. Attempting to reconnect...");
+	                
+	                // Try reconnecting to the server
+	                try {
+	                    openConnection();
+	                    System.out.println("Reconnected to the server.");
+	                } catch (IOException e) {
+	                    // If reconnection fails, wait before retrying
+	                    System.out.println("Reconnection failed. Retrying in 5 seconds...");
+	                    Thread.sleep(5000); // Retry after 5 seconds
+	                }
+	            }
+	            
+	            // Sleep for a while before checking again
+	            Thread.sleep(1000); // Check every 1 second
+	            
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 	public void exit() {
 		switch(status) {
@@ -255,6 +297,7 @@ public class GameClientController extends AbstractClient{
 		default:
 				
 		}
+		main.openMainPage();
 	}
 	public void StartGame() {
 		if(status.equals("Hosting")) {

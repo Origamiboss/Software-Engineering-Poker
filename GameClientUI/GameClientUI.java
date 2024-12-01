@@ -211,6 +211,10 @@ public class GameClientUI extends JPanel {
     public void updatePlayerChanged(int playerIndex, int cardsChanged) {
         if (playerIndex >= 0 && playerIndex < playerBetLabels.length) {
             playerBetLabels[playerIndex].setText("Cards Changed: " + cardsChanged);
+            //change those card images
+            for(int i = 0; i < cardsChanged; i++) {
+            	updatePlayerCard(playerIndex,i,"/Cards/black_joker.png");
+            }
         }
     }
 
@@ -247,9 +251,11 @@ public class GameClientUI extends JPanel {
 	            updatePlayerBalance(Ids, gd.getTotalMoneyAmount());
 	            updatePlayerBet(Ids, gd.getBettedMoney());
 	            
-	            
+	            //update the players cards changed
+	            updatePlayerChanged(Ids, gd.getCardsSwapped());
 	            Ids++;
-	            playerPanel.add(playerView);         
+	            playerPanel.add(playerView);  
+	            
     		}else {
     			//if it is me
     			updateUserBalance(gd.getTotalMoneyAmount());
@@ -270,7 +276,10 @@ public class GameClientUI extends JPanel {
     }
     public void judge(String msg) {
     	stage = stageOfGame.JUDGE;
-    	System.out.println(msg);
+    	//reset all cards
+    	for(int i = 0; i < 5; i++) {
+    		updateUserCard(i,"/Cards/back.png");
+    	}
     }
     private class ChangeCardListener implements ActionListener {
         @Override
@@ -317,7 +326,7 @@ public class GameClientUI extends JPanel {
         public void actionPerformed(ActionEvent e) {
         	if(stage == stageOfGame.BET) {
 	            // Handle fold action here
-	            
+	            gc.fold();
 	            stage = stageOfGame.NONE;
         	}
         }
@@ -345,8 +354,8 @@ public class GameClientUI extends JPanel {
     private class QuitButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Player quit the game");
             // Handle quit logic here
+            gc.exit();
         }
     }
 

@@ -54,7 +54,6 @@ public class Database {
 		String url = props.getProperty("url");
 		String user = props.getProperty("user");
 		String pass = props.getProperty("password");
-		
 		//Set the connection
 		Connection conn = DriverManager.getConnection(url, user, pass);
 	    return conn;
