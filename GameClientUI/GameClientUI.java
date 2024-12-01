@@ -256,8 +256,9 @@ public class GameClientUI extends JPanel {
     public void betIn() {
     	stage = stageOfGame.BET;
     }
-    public void judge() {
+    public void judge(String msg) {
     	stage = stageOfGame.JUDGE;
+    	System.out.println(msg);
     }
     private class ChangeCardListener implements ActionListener {
         @Override
@@ -313,15 +314,15 @@ public class GameClientUI extends JPanel {
     private class EndTurnButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Player ended turn");
             // Handle ending turn logic here
-            if(stage == stageOfGame.CHANGE) {
+            if(stage == stageOfGame.CHANGE && cardsToChange.size() > 0) {
             	//send the list of cards to server
             	//if the changeCards[i] == 1 then it is a card to change
             	//Message should be "Username:Card|1,Card|2"
             	
             	gc.changeCards(cardsToChange);
-            }else if(stage != stageOfGame.NONE) {
+            	stage = stageOfGame.NONE;
+            }else  {
             	stage = stageOfGame.NONE;
             	gc.skip();
             }

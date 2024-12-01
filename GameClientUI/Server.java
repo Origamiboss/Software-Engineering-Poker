@@ -38,6 +38,7 @@ public class Server extends AbstractServer{
 	  
 	  //how a latch works is that it will count down from a number before moving on
 	  private CountDownLatch latch = new CountDownLatch(0);
+	  private int whoBetted = 0;
 	  
 	  //get the phase of the server
 	  private enum phase {
@@ -198,82 +199,91 @@ public class Server extends AbstractServer{
 				  String msg = (String)arg0;
 				  switch(gamePhase) {
 				  case phase.Change:
-					  //Message should be "Username:1,2,3"
-					  //split the msg into username and cards
-					  String username = msg.split(":")[0];
-					  String cardMessage = msg.split(":")[1];
-					  String[] cards = cardMessage.split(",");
-					  //locate which player wants to replace their cards
-					  for(GameData gd : participantsInRound) {
-						  if(gd.getUsername().equals(username)) {
-							  List<Card> savedCards = hands.get(gd.getUsername());
-						        
-						        // Remove the cards, iterating in reverse order
-						        List<Integer> indicesToRemove = new ArrayList<>();
-						        for (String c : cards) {
-						            int index = Integer.parseInt(c);
-						            indicesToRemove.add(index);
+					// Message should be "Username:1,2,3"
+					// Split the msg into username and cards
+					if(msg.contains("Change;")) {
+						msg = msg.split("Change;")[1];
+						String username = msg.split(":")[0];
+						String cardMessage = msg.split(":")[1];
+	
+						// Check if cardMessage is not null or empty before proceeding
+						if (cardMessage != null && !cardMessage.isEmpty()) {
+						    String[] cards = cardMessage.split(",");
+						    
+						    // Locate which player wants to replace their cards
+						    for (GameData gd : participantsInRound) {
+						        if (gd.getUsername().equals(username)) {
+						            List<Card> savedCards = hands.get(gd.getUsername());
+						            
+						            // Remove the cards, iterating in reverse order
+						            List<Integer> indicesToRemove = new ArrayList<>();
+						            for (String c : cards) {
+						                int index = Integer.parseInt(c);
+						                indicesToRemove.add(index);
+						            }
+						            
+						            // Remove cards safely by iterating in reverse order to prevent index shifting issues
+						            Collections.sort(indicesToRemove, Collections.reverseOrder());
+						            for (int index : indicesToRemove) {
+						                savedCards.remove(index);
+						            }
+	
+						            // Add new cards
+						            savedCards.addAll(generateCards(cards.length));
+	
+						            // Save the updated cards
+						            hands.put(gd.getUsername(), savedCards);
+	
+						            // Turn hand into string
+						            int i = 0;
+						            for (Card c : hands.get(gd.getUsername())) {
+						                // Send the specific card data
+						                String card = "updateUserCard:";
+						                card = card + i + ",";
+						                i++;
+	
+						                // Locate the card path
+						                String[] cardData = c.getCardType().split(",");
+	
+						                // Fix cardData[1] with king, queen, jack, or ace
+						                if (cardData[1].contains("11")) {
+						                    cardData[1] = "jack";
+						                } else if (cardData[1].contains("12")) {
+						                    cardData[1] = "queen";
+						                } else if (cardData[1].contains("13")) {
+						                    cardData[1] = "king";
+						                } else if (cardData[1].contains("14")) {
+						                    cardData[1] = "ace";
+						                }
+	
+						                String cardPath = "/Cards/" + cardData[1] + "_of_" + cardData[0].toLowerCase() + ".png";
+						                card += cardPath;
+	
+						                // Give the cards
+						                updatePlayer(card, arg1);
+						            }
+	
+						            gd.setCardsSwapped(i);
+						            // Update all players
+						            updatePlayers(participantsInRound);
+						            latch.countDown();
 						        }
-						        // Remove cards safely by iterating in reverse order to prevent index shifting issues
-						        Collections.sort(indicesToRemove, Collections.reverseOrder());
-						        for (int index : indicesToRemove) {
-						            savedCards.remove(index);
-						        }
+					            break;
+					        }
+					    }
+					}
 
-						        // Add new cards
-						        savedCards.addAll(generateCards(cards.length));
-						        
-						        // Save the updated cards
-						        hands.put(gd.getUsername(), savedCards);
-							  //turn hand into string
-							  //Generate the String Array
-							  int i = 0;
-							  for(Card c : hands.get(gd.getUsername())) {
-								  
-								  
-								  
-								  //send the specific card data
-								  String card = "updateUserCard:";
-								  card = card + i +",";
-								  i++;
-								  //locate the card path
-								  String[] cardData = c.getCardType().split(",");
-								  //fix cardData[1] with king, queen, jack, or ace
-								  if(cardData[1].contains("11")) {
-									  cardData[1] = "jack";
-								  }else if(cardData[1].contains("12")) {
-									  cardData[1] = "queen";
-								  }else if(cardData[1].contains("13")) {
-									  cardData[1] = "king";
-								  }else if(cardData[1].contains("14")) {
-									  cardData[1] = "ace";
-								  }
-								  String cardPath = "/Cards/"+cardData[1]+"_of_"+cardData[0].toLowerCase()+".png";
-								  card += cardPath;
-								  
-								  //give the cards
-								  updatePlayer(card,arg1);
-								  
-							  }
-							  
-							  gd.setCardsSwapped(i);
-							  //update all players
-							  updatePlayers(participantsInRound);
-							  break;
-						  }
-					  }
-					  latch.countDown();
-					  break;
+					
+
+					break;
 				  case phase.Bet:
-					  //update the GameData with the bet and then update everybody about it
+					  //update the GameData with the bet and then update everybody about it. Only decrement the latch if the round is over
 					  //Example msg = "Bet:username,amount"
 					  if(msg.contains("Bet:")) {
 						  msg = msg.split("Bet:")[1];
 						  String[] data = msg.split(",");
 						  int bettedMoney = Integer.parseInt(data[1]);
 						  for(GameData gd : participantsInRound) {
-							  	System.out.println(data[1]);
-						        System.out.println(gd.getUsername() + ":" + data[0]);
 						        
 						        // Check if the player exists and has enough money
 						        if (gd.getUsername().equals(data[0]) && gd.getTotalMoneyAmount() >= bettedMoney && bettedMoney > 0 && bettedMoney + gd.getBettedMoney() >= highestBetter) {
@@ -286,17 +296,19 @@ public class Server extends AbstractServer{
 						            // If the new bet is higher than the current highest, update the highest bet
 						            if (bettedMoney > highestBetter) {
 						                highestBetter = bettedMoney;
-						                latch = new CountDownLatch(participantsInRound.size());  // Reset latch for all players
+						                whoBetted = 0;
 						            }
-
+						            System.out.println("Latch Count Before: " + latch.getCount());
 						            // Update the player's bet with the new total bet
 						            gd.setBettedMoney(bettedMoney);
 
 						            // Broadcast updates to all players
 						            updatePlayers(participantsInRound);
-
-						            // Only count down the latch if the bet is valid
-						            latch.countDown();
+						            whoBetted++;
+						            //if everyone has betted or folded then latchDown
+						            if(whoBetted >= participantsInRound.size())
+						            	latch.countDown();
+						            System.out.println("Latch Count After: " + latch.getCount());
 						            break;
 						        }
 						  }
@@ -312,16 +324,20 @@ public class Server extends AbstractServer{
 						  if(rmgd != null) {
 							  participantsInRound.remove(rmgd);
 						  }
+						//if everyone has betted or folded then latchDown
+			            if(whoBetted >= participantsInRound.size())
+			            	latch.countDown();
 						  updatePlayers(participantsInRound);
-						  latch.countDown();
 						  
 					  }
 					  
 					  
 					  break;
+						  
 				  }
 				  if(gamePhase != phase.Bet && msg.contains("skip")) {
 					  latch.countDown();
+					  //updatePlayers(participantsInRound);
 				  }
 			  }
 			  if(arg0 instanceof Map) {
@@ -357,6 +373,7 @@ public class Server extends AbstractServer{
 		  updatePlayers(players);
 		  //run the game until there is 1 player left
 		  while(players.size() > 1) {
+			  latch = new CountDownLatch(players.size());
 			  usedCards = new ArrayList<>();
 			  //buy in
 			  updatePlayers("Buy in " + buyInCost);
@@ -372,12 +389,13 @@ public class Server extends AbstractServer{
 			  gamePhase = phase.Change;
 			  latch.await();
 			  
-			  latch = new CountDownLatch(participantsInRound.size());
+			  latch = new CountDownLatch(1);
 			  //betting phase
 			  highestBetter = buyInCost;
 			  updatePlayers("Bet ");
 			  gamePhase = phase.Bet;
 			  latch.await();
+			  System.out.println("Judging Time");
 			  updatePlayers(participantsInRound);
 			  
 			  latch = new CountDownLatch(participantsInRound.size());
@@ -411,34 +429,87 @@ public class Server extends AbstractServer{
 		  }
 	  }
 	  private String decideWinner() {
-		  String winner = "";
-		  int[] handValues = new int[participantsInRound.size()];
-		  //keep track of highest card type
-		  HashMap<String, Card.Suit> types = new HashMap<>();
-		  for(int i = 0; i < handValues.length; i++) {
-			  List<Card> hand = hands.get(participantsInRound.get(i).getUsername());
-			  //find the point value of the hand
-			  //Scoring system
-			  //0-garbage
-			  //20-pair
-			  //40-2Pair
-			  //60-3 of kind
-			  //80-straight
-			  //100-flush
-			  //120- full house
-			  //140- four of kind
-			  //160-straight flush
-			  //180- royale flush
-			  switch(PokerHandEvaluator.evaluateHand(hand)) {
-			  
-			  }
-			  
-			  
-			  
-		  }
-		  
-		  return winner;
-	  }
+		    String winner = "";
+		    int highestHandValue = -1;
+		    List<String> potentialWinners = new ArrayList<>();
+
+		    // Evaluate each player's hand and determine the hand strength
+		    for (GameData player : participantsInRound) {
+		        List<Card> hand = hands.get(player.getUsername());
+		        String handStrength = PokerHandEvaluator.evaluateHand(hand);
+
+		        // Convert hand strength to a numerical value for comparison
+		        int handValue = getHandValue(handStrength);
+
+		        if (handValue > highestHandValue) {
+		            // New highest hand, update the winner
+		            highestHandValue = handValue;
+		            potentialWinners.clear();
+		            potentialWinners.add(player.getUsername());
+		        } else if (handValue == highestHandValue) {
+		            // Tie between players, add to potential winners
+		            potentialWinners.add(player.getUsername());
+		        }
+		    }
+
+		    // If there is a tie, compare the kicker cards (the highest remaining cards)
+		    if (potentialWinners.size() == 1) {
+		        winner = potentialWinners.get(0);
+		    } else {
+		        // Handle tie-breaking (e.g., comparing high cards)
+		        winner = resolveTie(potentialWinners);
+		    }
+
+		    return winner;
+		}
+
+		// Convert the hand strength to a numerical value for comparison
+		private int getHandValue(String handStrength) {
+		    switch (handStrength) {
+		        case "Royal Flush":
+		            return 180;
+		        case "Straight Flush":
+		            return 160;
+		        case "Four of a Kind":
+		            return 140;
+		        case "Full House":
+		            return 120;
+		        case "Flush":
+		            return 100;
+		        case "Straight":
+		            return 80;
+		        case "Three of a Kind":
+		            return 60;
+		        case "Two Pair":
+		            return 40;
+		        case "One Pair":
+		            return 20;
+		        default:
+		            return 0; // High Card or invalid hand
+		    }
+		}
+
+		// Resolve tie by comparing high cards
+		private String resolveTie(List<String> tiedPlayers) {
+		    List<Card> bestHand = null;
+		    String winner = "";
+
+		    // Compare the highest card (or kicker) in each tied player's hand
+		    for (String player : tiedPlayers) {
+		        List<Card> hand = hands.get(player);
+		        // Sort hand in descending order (highest card first)
+		        hand.sort((card1, card2) -> Integer.compare(card2.getValue(), card1.getValue()));
+
+		        // If this is the first player or their highest card is better, update the winner
+		        if (bestHand == null || hand.get(0).getValue() > bestHand.get(0).getValue()) {
+		            bestHand = hand;
+		            winner = player;
+		        }
+		    }
+
+		    return winner;
+		}
+
 	  //generate a whole new hand
 	  private List<Card> generateCards() {
 		  return generateCards(5);

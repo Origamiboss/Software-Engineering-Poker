@@ -171,7 +171,7 @@ public class GameClientController extends AbstractClient{
 	            }
 	            if(message.startsWith("Winner is")) {
 	            	//tell the client its time to change
-	            	gameui.judge();
+	            	gameui.judge(message);
 	            }
 	            if (message.startsWith("updateUserBalance:")) 
 	            {
@@ -301,7 +301,7 @@ public class GameClientController extends AbstractClient{
 	}
 	public void changeCards(ArrayList<Integer> indexes) {
 		//Message should be "Username:1,2,3"
-		String data = myData.getUsername() + ":";
+		String data = "Change;" + myData.getUsername() + ":";
 		for(int i : indexes) {
 			data = data + i + ",";
 		}
