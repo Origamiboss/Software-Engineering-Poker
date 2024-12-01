@@ -18,6 +18,7 @@ public class GameClientUI extends JPanel {
     private JLabel potLabel;
     private JLabel[] playerBalanceLabels;
     private JLabel[] playerBetLabels;
+    private JLabel[] playerChangedLabels;
     private JLabel[] playerStatusLabels;
     private JLabel[][] playerCardLabels;
     private JLabel[] userCardLabels;
@@ -56,6 +57,7 @@ public class GameClientUI extends JPanel {
 
         playerBalanceLabels = new JLabel[3];
         playerBetLabels = new JLabel[3];
+        playerChangedLabels = new JLabel[3];
         playerStatusLabels = new JLabel[3];
         playerCardLabels = new JLabel[3][5];
 
@@ -75,14 +77,16 @@ public class GameClientUI extends JPanel {
         JPanel playerView = new JPanel();
         playerView.setLayout(new BorderLayout());
 
-        JPanel playerInfo = new JPanel(new GridLayout(3, 1));
+        JPanel playerInfo = new JPanel(new GridLayout(4, 1));
         JLabel playerNameLabel = new JLabel(playerName);
-        playerBalanceLabels[playerIndex] = new JLabel("Balance: $0");
-        playerBetLabels[playerIndex] = new JLabel("Bet: $0");
+        playerBalanceLabels[playerIndex] = new JLabel("Balance: $");
+        playerBetLabels[playerIndex] = new JLabel("Bet: $");
+        playerChangedLabels[playerIndex] = new JLabel("Cards Changed: ");
         playerStatusLabels[playerIndex] = new JLabel("Status: Active");
         playerInfo.add(playerNameLabel);
         playerInfo.add(playerBalanceLabels[playerIndex]);
         playerInfo.add(playerBetLabels[playerIndex]);
+        playerInfo.add(playerChangedLabels[playerIndex]);
 
         playerView.add(playerInfo, BorderLayout.WEST);
 
@@ -201,6 +205,12 @@ public class GameClientUI extends JPanel {
     public void updatePlayerStatus(int playerIndex, String status) {
         if (playerIndex >= 0 && playerIndex < playerStatusLabels.length) {
             playerStatusLabels[playerIndex].setText("Status: " + status);
+        }
+    }
+    
+    public void updatePlayerChanged(int playerIndex, int cardsChanged) {
+        if (playerIndex >= 0 && playerIndex < playerBetLabels.length) {
+            playerBetLabels[playerIndex].setText("Cards Changed: " + cardsChanged);
         }
     }
 

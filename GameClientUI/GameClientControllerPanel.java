@@ -79,7 +79,7 @@ public class GameClientControllerPanel extends JPanel {
     }
 
     public void updateCardsChanged(int playerIndex, int cardsChanged) {
-        clientUI.updatePlayerBet(playerIndex, cardsChanged);
+        clientUI.updatePlayerChanged(playerIndex, cardsChanged);
     }
 
     public void isHosting(boolean isHosting) {
