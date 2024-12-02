@@ -456,7 +456,7 @@ public class Server extends AbstractServer {
 			  Thread.sleep(1000);
 			  updatePlayers("Winner is " + winner);
 			  //send them all of the cards
-			  System.out.println("Sending Cards");
+			  /*System.out.println("Sending Cards");
 			  for(GameData gd : participantsInRound) {
 				  String data = "showCards:";
 				  data += gd.getUsername() +";";
@@ -467,7 +467,7 @@ public class Server extends AbstractServer {
 				  System.out.println("Hand:" + data);
 				  updatePlayers(data);
 				  Thread.sleep(100);
-			  }
+			  }*/
 			  gamePhase = phase.Judge;
 			  Thread.sleep(5000);
 			  //latch.await();
