@@ -327,6 +327,7 @@ public class Server extends AbstractServer {
 						        }
 						  }
 					  }
+					  //rework
 					  if(msg.startsWith("Fold:")) {
 						  msg = msg.split("Fold:")[1];
 						  GameData rmgd = null;
@@ -339,9 +340,9 @@ public class Server extends AbstractServer {
 							  participantsInRound.remove(rmgd);
 						  }
 						//if everyone has betted or folded then latchDown
-			            if(whoBetted >= participantsInRound.size())
-			            	latch.countDown();
 						  updatePlayers(participantsInRound);
+						  if(whoBetted >= participantsInRound.size())
+				            	latch.countDown();
 						  
 					  }
 					  break;
@@ -468,6 +469,7 @@ public class Server extends AbstractServer {
 				  Thread.sleep(1000);
 			  }*/
 			  gamePhase = phase.Judge;
+			  Thread.sleep(5000);
 			  //latch.await();
 		  }
 	  }
