@@ -1,10 +1,10 @@
-drop table users;
+drop table player;
 
-create table users(
+create table player(
 username varchar(30),
 password varbinary(16),
 wealth integer);
 
-alter table users
+alter table player
 	add constraint users_username_pk primary key(username);
 
