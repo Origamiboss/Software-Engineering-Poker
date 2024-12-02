@@ -8,5 +8,7 @@
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="lib" path="C:/Users/Lando/OneDrive/Desktop/School Files/Fall 24/Sw-temp/LabIns/ocsf.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="C:/Users/Lando/OneDrive/Desktop/School Files/Fall 24/Sw-temp/LabIns/mysql-connector-java-5.1.40-bin.jar"/>
+	<classpathentry kind="lib" path="C:/Temp/Software-Engineering-Poker/mockito-core-5.14.2-javadoc.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
