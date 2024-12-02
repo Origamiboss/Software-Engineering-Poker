@@ -452,7 +452,7 @@ public class Server extends AbstractServer {
 			  latch = new CountDownLatch(participantsInRound.size());
 			  //judging phase
 			  String winner = decideWinner();
-			  
+			  Thread.sleep(1000);
 			  updatePlayers("Winner is " + winner);
 			  /*Thread.sleep(1000);
 			  //send them all of the cards
