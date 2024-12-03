@@ -211,8 +211,8 @@ public class GameClientUI extends JPanel {
     }
     
     public void updatePlayerChanged(int playerIndex, int cardsChanged) {
-        if (playerIndex >= 0 && playerIndex < playerBetLabels.length) {
-            playerBetLabels[playerIndex].setText("Cards Changed: " + cardsChanged);
+        if (playerIndex >= 0 && playerIndex < playerChangedLabels.length) {
+            playerChangedLabels[playerIndex].setText("Cards Changed: " + cardsChanged);
             //change those card images
             for(int i = 0; i < cardsChanged; i++) {
             	updatePlayerCard(playerIndex,i,"/Cards/black_joker.png");
