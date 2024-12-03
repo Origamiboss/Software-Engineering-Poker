@@ -1,4 +1,5 @@
-run the project.sql file to set up the database on your MySQL host (source c:\filepath\project.sql)
+run the project.sql file to set up the database on your MySQL host. make sure to run it inside a database called student_space (or modify the db.properties file in the sweProject package) (source c:\filepath\project.sql)
+
 
 make sure you keep your MySQL host running
 
