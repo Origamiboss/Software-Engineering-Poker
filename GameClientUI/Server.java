@@ -91,7 +91,26 @@ public class Server extends AbstractServer {
 	  }
 
 	  // When a message is received from a client, handle it.
-	  public void handleMessageFromClient(Object arg0, ConnectionToClient arg1)
+	  protected void handleMessageFromClient(Object arg0, ConnectionToClient arg1)
+	  {
+		  //create a thread per message
+		  Thread gameThread = new Thread(new Runnable() {
+		        @Override
+		        public void run() {
+		            try {
+		            	handleMessageFromClientThread(arg0,arg1);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		        }
+		    });
+
+		    // Start the thread
+		    gameThread.start();
+		  
+	  }
+	  protected void handleMessageFromClientThread(Object arg0, ConnectionToClient arg1)
 	  {
 		  System.out.println(arg0);
 		  //Pre Game server stuff
@@ -425,6 +444,7 @@ public class Server extends AbstractServer {
 		  //run the game until there is 1 player left
 		  while(players.size() > 1) {
 			  pot = 0;
+			  whoBetted = 0;
 			  participantsInRound.clear();
 			  //Give All Players the GameData
 			  updatePlayers(players);
@@ -456,26 +476,46 @@ public class Server extends AbstractServer {
 			  Thread.sleep(1000);
 			  updatePlayers("Winner is " + winner);
 			  //send them all of the cards
-			  /*System.out.println("Sending Cards");
-			  for(GameData gd : participantsInRound) {
-				  String data = "showCards:";
-				  data += gd.getUsername() +";";
-				  for(Card c : hands.get(gd.getUsername())) {
-					  data += c.getCardType() + ":";
-				  }
-				  data = data.substring(0, data.length() - 1);
-				  System.out.println("Hand:" + data);
-				  updatePlayers(data);
-				  Thread.sleep(100);
-			  }*/
+			//now run this in the background
+			  Thread judgeThread = new Thread(new Runnable() {
+			        @Override
+			        public void run() {
+			            try {
+			            	sendAllCards();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			        }
+			    });
+
+			   // Start the thread
+			  judgeThread.start();
 			  gamePhase = phase.Judge;
-			  Thread.sleep(5000);
-			  //latch.await();
+			  latch.await();
 		  }
 	  }
 	  
 	  
-	  
+	  private void sendAllCards() {
+		  System.out.println("Sending Cards");
+		  for(GameData gd : participantsInRound) {
+			  String data = "showCards:";
+			  data += gd.getUsername() +";";
+			  for(Card c : hands.get(gd.getUsername())) {
+				  data += c.getCardType() + ":";
+			  }
+			  data = data.substring(0, data.length() - 1);
+			  System.out.println("Hand:" + data);
+			  updatePlayers(data);
+			  try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		  }
+	  }
 	  private void updatePlayers(Object obj) {
 		//update all players
 		  for(ConnectionToClient c : clients) {

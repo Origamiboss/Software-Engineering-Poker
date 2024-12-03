@@ -220,9 +220,11 @@ public class GameClientController extends AbstractClient{
 	            if(message.startsWith("showCards:")) {
 	            	String msg = message.split("showCards:")[1];
 	            	String username = msg.split(";")[0];
-	            	String other = msg.split(";")[1];
-	            	String[] CardData = other.split(":");
-	            	gameui.showAllCards(username,CardData);
+	            	if(!username.equals(myData.getUsername())) {
+		            	String other = msg.split(";")[1];
+		            	String[] CardData = other.split(":");
+		            	gameui.showAllCards(username,CardData);
+	            	}
 	            }
 	            if(message.startsWith("Pot:")) {
 	            	gameui.updatePot(message.split("Pot:")[1]);
