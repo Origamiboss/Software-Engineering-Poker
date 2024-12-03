@@ -12,4 +12,4 @@ before running it, right click on the project in the papyrus UI and click proper
 
 and then click add external JARs and add the msql-connector and the ocsf JARs that come with the source code (for some reason papyrus doesn't like it unless you manually set the classpath) and click apply and close
 
-after that run the DataServer.bat file to start our database server and then the PokerStarter.bat to start the game
+after that run the DataServer.bat file to start our database server (you will need to enter the ip of the machine you are running the database server on) and then the PokerStarter.bat to start the game
