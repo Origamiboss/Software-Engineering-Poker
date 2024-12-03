@@ -3,6 +3,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -24,11 +25,11 @@ public class MainControl extends JFrame{
     private GameClientControllerPanel gameClient;
     private LoginController login;
     private JPanel contentPanel;  // Container to hold the pages
-    static private String host = "localhost";
+    private String host = "localhost";
     Player player;
 
-    public MainControl() {
-    	
+    public MainControl(String databaseHost) {
+    	host = databaseHost;
         initial = new InitialPageController(this);
         main = new MainPageController(this, host);
         account = new NewAccountController(this, host);
@@ -127,7 +128,12 @@ public class MainControl extends JFrame{
 	}
 	
 	public static void main(String[] args) {
-		new MainControl();
+		//get the host and set it
+		Scanner scanner = new Scanner(System.in);
+        
+        System.out.print("Enter the Database Ip: ");
+        String host = scanner.nextLine();
+		new MainControl(host);
 	}
 	private class testClient extends AbstractClient{
 		
