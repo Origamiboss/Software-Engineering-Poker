@@ -18,23 +18,22 @@ import ocsf.client.AbstractClient;
 
 public class MainControl extends JFrame{
 	
-	private Database db;
     private InitialPageController initial;
     private MainPageController main;
     private NewAccountController account;
     private GameClientControllerPanel gameClient;
     private LoginController login;
     private JPanel contentPanel;  // Container to hold the pages
-    
+    static private String host = "localhost";
     Player player;
 
     public MainControl() {
-		db = new Database();
+    	
         initial = new InitialPageController(this);
-        main = new MainPageController(this,db);
-        account = new NewAccountController(this, db);
+        main = new MainPageController(this, host);
+        account = new NewAccountController(this, host);
         gameClient = new GameClientControllerPanel(this);
-        login = new LoginController(this,db);
+        login = new LoginController(this,host);
         
         // Set up JFrame properties
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

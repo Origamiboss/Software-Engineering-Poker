@@ -1,10 +1,14 @@
 package MainPageUI;
 
+import java.io.IOException;
+
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import ocsf.client.AbstractClient;
 import sweProject.Database;
 import sweProject.MainControl;
+import sweProject.Player;
 
 public class MainPageController extends JPanel {
 	private MainControl main;
@@ -12,14 +16,16 @@ public class MainPageController extends JPanel {
 	private MainPageGUI mainpage;
 	private HostGameUI hostpage;
 	private JoinGameUI joinpage;
-	private Database db;
+	private dataClient client;
+	private String hostName;
 	static int sizex = 500;
 	static int sizey = 500;
 	
-	public MainPageController(MainControl mainControl, Database db){
+	public MainPageController(MainControl mainControl, String host){
 		this.setSize(sizex,sizey);
 		this.main = mainControl;
-		this.db = db;
+		hostName = host;
+		client = new dataClient(host,1010);
 		mainpage = new MainPageGUI(this);
 		hostpage = new HostGameUI(this);
 		joinpage = new JoinGameUI(this);
@@ -86,9 +92,36 @@ public class MainPageController extends JPanel {
 
         // Handle the user's response
         if (result == JOptionPane.YES_OPTION) {
-            db.removePlayer(main.getPlayer());
-            main.openInitial();
+            try {
+				client.sendToServer(main.getPlayer());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            
             // Perform the action (e.g., delete the item)
         } 
+	}
+	private class dataClient extends AbstractClient{
+
+		public dataClient(String host, int port) {
+			super(host, port);
+			try {
+				openConnection();
+				sendToServer("Remove");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		protected void handleMessageFromServer(Object arg0) {
+			if(arg0 instanceof String) {
+				String msg = (String)arg0;
+				if(msg.startsWith("Success")) {
+					main.openInitial();
+				}
+			}
+		}
+		
 	}
 }

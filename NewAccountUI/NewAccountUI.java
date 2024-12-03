@@ -80,7 +80,13 @@ public class NewAccountUI extends JPanel{
 		
 		
 	}
-	
+	public void resetEverything() {
+		//reset fields
+		writeErrorMsg("");
+		username.setText("");
+		password.setText("");
+		passwordAgain.setText("");
+	}
 	private class EventHandler implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == cancel) {
@@ -100,12 +106,11 @@ public class NewAccountUI extends JPanel{
 					LoginData data = new LoginData();
 					data.setUsername(username.getText());
 					data.setPassword(password.getText());
-					//reset fields
-					writeErrorMsg("");
-					username.setText("");
-					password.setText("");
-					passwordAgain.setText("");
-					controller.CreateAccount(data);
+					
+					
+					controller.VerifyAccount(data);
+					
+					
 				}else {
 					//error occured
 					if(username.getText().length() <= 0) {
@@ -119,7 +124,12 @@ public class NewAccountUI extends JPanel{
 			}
 		}
 	}
-		
+	public void CreateAccount() {
+		LoginData data = new LoginData();
+		data.setUsername(username.getText());
+		data.setPassword(password.getText());
+		controller.CreateAccount(data);
+	}
 	
 	
 	

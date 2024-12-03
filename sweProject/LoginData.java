@@ -1,6 +1,8 @@
 package sweProject;
 
-public class LoginData {
+import java.io.Serializable;
+
+public class LoginData implements Serializable{
 	private String purpose;
 	private String username;
 	private String password;
