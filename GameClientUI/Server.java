@@ -299,7 +299,7 @@ public class Server extends AbstractServer {
 						  for(GameData gd : participantsInRound) {
 						        
 						        // Check if the player exists and has enough money
-						        if (gd.getUsername().equals(data[0]) && gd.getTotalMoneyAmount() >= bettedMoney && bettedMoney > 0 && bettedMoney + gd.getBettedMoney() >= highestBetter) {
+						        if (gd.getUsername().equals(data[0]) && gd.getTotalMoneyAmount() >= bettedMoney && bettedMoney >= 0 && bettedMoney + gd.getBettedMoney() >= highestBetter) {
 						            // Remove the bet amount from the player's total money
 						            gd.setTotalMoneyAmount(gd.getTotalMoneyAmount() - bettedMoney);
 						            pot+= bettedMoney;
